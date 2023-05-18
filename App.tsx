@@ -1,10 +1,10 @@
-import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Button, TouchableOpacity, Alert } from 'react-native';
-import tw from "twrnc";
-import { BarCodeScanner } from "expo-barcode-scanner";
+import tw from 'twrnc';
 import { useEffect, useState } from 'react';
 import { Camera, CameraType } from 'expo-camera';
 import * as Location from 'expo-location';
+import CryptoJS from 'crypto-js';
+import { AES_HASH_SECRET_KEY } from '@env';
 
 export default function App() {
   const [type, setType] = useState(CameraType.back);
@@ -13,6 +13,11 @@ export default function App() {
   const [scanning, setScanning] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState("");
   const [location, setLocation] = useState<object>({});
+
+  const encryptEventData = (eventData: object) => {
+    const encryptedMessage = CryptoJS.AES.encrypt(JSON.stringify(eventData), AES_HASH_SECRET_KEY).toString();
+    return encryptedMessage;
+  }
 
   useEffect(() => {
     (async () => {
@@ -37,6 +42,11 @@ export default function App() {
       if (qrCodeDataArr.length != 4) {
         return Alert.alert("Data format doesn't meet requirements: ", scannedData);
       }
+
+      if (selectedEvent == "") {
+        return Alert.alert("Please select event type.", "Please specify the event type.");
+      }
+
       const date = Date.now();
 
       const eventData = {
@@ -49,8 +59,39 @@ export default function App() {
         date: date.toString()
       }
 
-      Alert.alert('Scanned Data', scannedData);
-      setScannedData("");
+      const sendPostRequest = async () => {
+        try {
+          const response = await fetch('http://192.168.1.16:4000/save-real-item-history', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ data: encryptEventData(eventData) }), // Replace with your request payload
+          });
+
+          if (response.ok) {
+            // Request was successful
+            const data = await response.json();
+            if (data.err) {
+              Alert.alert('Request not successful', scannedData);
+              setScannedData("");
+
+            } else if (data.activeItem) {
+
+              Alert.alert('Operation successfully recorded', `Real item for NFT with tokenId ${eventData.openseaTokenId}, with owner ${eventData.buyer} is successfully recorded.`);
+              setScannedData("");
+
+            }
+          } else {
+            // Request failed
+            console.log('Request failed with status:', response.status);
+          }
+        } catch (error) {
+          console.log('Error:', error);
+        }
+      };
+
+      sendPostRequest();
     }
   }, [scanning]);
 
