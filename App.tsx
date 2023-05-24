@@ -61,7 +61,7 @@ export default function App() {
 
       const sendPostRequest = async () => {
         try {
-          const response = await fetch('http://192.168.1.16:4000/save-real-item-history', {
+          const response = await fetch('http://10.34.23.241:4000/save-real-item-history', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
