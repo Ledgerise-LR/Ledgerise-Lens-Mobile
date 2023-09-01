@@ -118,19 +118,28 @@ export default function Asset({ route, navigation }) {
       <Text style={tw`text-xs`}>{assetDescription}</Text>
       <Text style={tw`mt-5 text-lg`}>Pick the checkpoint location</Text>
       <View style={tw`mt-3 flex flex-row`}>
-        <TouchableOpacity style={tw`bg-slate-700 flex items-center justify-center w-1/3 h-10 rounded mr-2 ${stampDisabled ? `bg-slate-500` : ``}`} disabled={stampDisabled}>
+        <TouchableOpacity style={tw`bg-slate-700 flex items-center justify-center w-1/3 h-10 rounded mr-2 ${stampDisabled ? `bg-slate-500` : ``}`} disabled={stampDisabled} onPressOut={() => navigation.navigate("CameraPage", {
+          tokenId: tokenId,
+          key: "stamp"
+        })}>
           <Text style={tw`text-slate-100`}>Üretim noktası</Text>
           {deliveredDisabled ? (<View style={tw`absolute w-8 bg-green-600 aspect-square rounded-full flex justify-center items-center`}>
             <Text style={tw`font-700 text-slate-50`}>✓</Text>
           </View>) : ("")}
         </TouchableOpacity>
-        <TouchableOpacity style={tw`bg-slate-700 flex items-center justify-center w-1/3 h-10 rounded mr-2 ${stampDisabled ? `bg-slate-500` : ``}`} disabled={shippedDisabled}>
+        <TouchableOpacity style={tw`bg-slate-700 flex items-center justify-center w-1/3 h-10 rounded mr-2 ${stampDisabled ? `bg-slate-500` : ``}`} disabled={shippedDisabled} onPressOut={() => navigation.navigate("CameraPage", {
+          tokenId: tokenId,
+          key: "shipped"
+        })}>
           <Text style={tw`text-slate-100`}>Depo 1</Text>
           {deliveredDisabled ? (<View style={tw`absolute w-8 bg-green-600 aspect-square rounded-full flex justify-center items-center`}>
             <Text style={tw`font-700 text-slate-50`}>✓</Text>
           </View>) : ("")}
         </TouchableOpacity>
-        <TouchableOpacity style={tw`bg-slate-700 flex items-center justify-center w-1/3 h-10 rounded mr-2 ${deliveredDisabled ? `bg-slate-500` : ``}`} disabled={deliveredDisabled}>
+        <TouchableOpacity style={tw`bg-slate-700 flex items-center justify-center w-1/3 h-10 rounded mr-2 ${deliveredDisabled ? `bg-slate-500` : ``}`} disabled={deliveredDisabled} onPressOut={() => navigation.navigate("CameraPage", {
+          tokenId: tokenId,
+          key: "delivered"
+        })}>
           <Text style={tw`text-slate-100`}>Teslim noktası</Text>
           {deliveredDisabled ? (<View style={tw`absolute w-8 bg-green-600 aspect-square rounded-full flex justify-center items-center`}>
             <Text style={tw`font-700 text-slate-50`}>✓</Text>

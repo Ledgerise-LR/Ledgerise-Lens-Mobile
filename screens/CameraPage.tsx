@@ -1,12 +1,16 @@
-import { StyleSheet, Text, View, Button, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, View, Button, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import tw from 'twrnc';
 import { useEffect, useState } from 'react';
 import { Camera, CameraType } from 'expo-camera';
 import * as Location from 'expo-location';
 import CryptoJS from 'crypto-js';
 import { AES_HASH_SECRET_KEY } from '@env';
+import axios from 'axios';
 
-export default function CameraPage() {
+export default function CameraPage({ route, navigate }) {
+
+  const { tokenId, key } = route.params;
+
   const [type, setType] = useState(CameraType.back);
   const [permission, requestPermission] = Camera.useCameraPermissions();
   const [scannedData, setScannedData] = useState("");
@@ -18,6 +22,54 @@ export default function CameraPage() {
     const encryptedMessage = CryptoJS.AES.encrypt(JSON.stringify(eventData), AES_HASH_SECRET_KEY).toString();
     return encryptedMessage;
   }
+
+  const [asset, setAsset] = useState({
+    history: [{
+      key: ""
+    }],
+    real_item_history: [{
+      key: ""
+    }]
+  });
+
+  const calculateProductRecordInfoSpecificLocation = (targetAsset: any) => {
+
+    let buyCount = 0;
+
+    let targetKeyCount = 0;
+
+    for (let i = 0; i < targetAsset.history.length; i++) {
+      const eachHistory = targetAsset.history[i];
+      if (eachHistory.key == "buy") {
+        buyCount++;
+      }
+    }
+
+    for (let i = 0; i < targetAsset.real_item_history.length; i++) {
+      const eachRealItemEvent = targetAsset.real_item_history[i];
+      if (eachRealItemEvent.key == key) {
+        targetKeyCount++;
+      }
+    }
+
+
+    return {
+      total: buyCount,
+      targetKey: targetKeyCount
+    }
+  }
+
+  useEffect(() => {
+
+    const url = `http://192.168.1.14:4000/get-asset?tokenId=${tokenId}`;
+
+    axios.get(url)
+      .then(res => {
+        const data = res.data;
+        setAsset(data.activeItem);
+      })
+
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -104,7 +156,7 @@ export default function CameraPage() {
   if (!permission.granted) {
     // Camera permissions are not granted yet
     return (
-      <View style={styles.container}>
+      <View style={tw`w-full p-4`}>
         <Text style={{ textAlign: 'center' }}>We need your permission to show the camera</Text>
         <Button onPress={requestPermission} title="grant permission" />
       </View>
@@ -129,70 +181,17 @@ export default function CameraPage() {
   }
 
   return (
-    <View style={styles.container}>
-      <Camera style={styles.camera} type={type} onBarCodeScanned={scanning ? handleBarCodeScanned : undefined}>
-        <View style={tw`flex-1 flex p-16 justify-center items-center`}>
-          <Text style={tw`flex-1 text-slate-50 text-2xl font-bold`}>Select Event</Text>
-          <View style={tw`flex flex-1 flex-row -mt-20`}>
-            <TouchableOpacity style={tw`mr-5`} onPress={() => setSelectedEvent("stamp")}>
-              <Text style={tw`flex-1 text-lg font-bold font-bold text-slate-50`}>Stamped</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={tw`mr-5`} onPress={() => setSelectedEvent("shipped")}>
-              <Text style={tw`flex-1 text-slate-50 text-lg font-bold`}>Shipped</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setSelectedEvent("delivered")}>
-              <Text style={tw`flex-1 text-slate-50 text-lg font-bold`}>Delivered</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={toggleCameraType}>
-            <Text style={styles.text}>Flip Camera</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={toggleScanning}>
-            <Text style={styles.text}>{scanning ? 'Stop Scanning' : 'Start Scanning'}</Text>
-          </TouchableOpacity>
+    <View style={tw`w-full h-full`}>
+      <Camera style={tw`w-full h-full`} type={type} onBarCodeScanned={scanning ? handleBarCodeScanned : undefined}>
+        <View style={tw`flex-1 flex p-8 justify-center items-center`}>
+          <Text style={tw`flex-1 text-slate-50 text-lg font-bold`}>Searching for target product...</Text>
         </View>
       </Camera >
+      <View style={tw`absolute bottom-0 h-12 w-full left-0 bg-slate-500/50 flex justify-center items-center`}>
+        <Text style={tw`text-slate-50`}>{
+          <Text>{calculateProductRecordInfoSpecificLocation(asset).targetKey} recorded out of {calculateProductRecordInfoSpecificLocation(asset).total} at {key.toUpperCase()} location</Text>
+        }</Text>
+      </View>
     </View >
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  camera: {
-    flex: 1,
-  },
-  buttonContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    backgroundColor: 'transparent',
-    margin: 64,
-  },
-  button: {
-    flex: 1,
-    alignSelf: 'flex-end',
-    alignItems: 'center',
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  dropdownContainer: {
-    width: 200,
-    height: 40,
-  },
-  dropdown: {
-    backgroundColor: '#fafafa',
-  },
-  dropdownItem: {
-    justifyContent: 'flex-start',
-  },
-  dropdownDropdown: {
-    backgroundColor: '#fafafa',
-  }
-});

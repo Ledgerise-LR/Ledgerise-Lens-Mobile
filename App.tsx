@@ -4,6 +4,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import Collections from "./screens/Collections";
 import Assets from "./screens/Assets";
 import Asset from "./screens/Asset";
+import CameraPage from "./screens/CameraPage";
 
 
 const Stack = createStackNavigator();
@@ -27,6 +28,11 @@ export default function App() {
           name="Asset"
           component={Asset}
           options={{ title: "Asset Details" }}
+        />
+        <Stack.Screen
+          name="CameraPage"
+          component={CameraPage}
+          options={{ title: "LedgeriseLens" }}
         />
       </Stack.Navigator>
     </NavigationContainer >
