@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Button, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, View, Button, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import tw from 'twrnc';
 import { useEffect, useState } from 'react';
 import CryptoJS from 'crypto-js';
@@ -19,7 +19,6 @@ export default function Collections({ navigation }) {
     axios.get(url)
       .then(res => {
         const data = res.data.subcollections;
-        console.log(data[0]);
         setCollections(data);
       })
       .catch(error => {
@@ -29,7 +28,7 @@ export default function Collections({ navigation }) {
   }, []);
 
   return (
-    <View style={tw`w-full h-full p-8`}>
+    <ScrollView style={tw`w-full h-full p-8`}>
       <Text style={tw`text-2xl`}>Collections</Text>
       <View style={tw`w-full h-0.5 bg-slate-900 mb-5`}></View>
       {collections.map(collection => {
@@ -39,10 +38,10 @@ export default function Collections({ navigation }) {
             navigation={navigation}
             itemId={collection["itemId"]}
             collectionName={collection["name"]}
-            collectionPhoto={collection["image"]}
+            collectionPhoto={collection["image"] || "https://wallpaperaccess.com/full/187161.jpg"}
           />
         )
       })}
-    </View >
+    </ScrollView >
   );
 }
