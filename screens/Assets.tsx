@@ -17,7 +17,6 @@ export default function Assets({ route, navigation }) {
     axios.get(url)
       .then((res) => {
         const data = res.data;
-        console.log(data.activeItems[1])
         setAssets(data.activeItems);
       })
       .catch((err) => {

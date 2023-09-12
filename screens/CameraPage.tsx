@@ -1,27 +1,63 @@
-import { StyleSheet, Text, View, Button, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, Button, TouchableOpacity, Alert, ScrollView, Image } from 'react-native';
 import tw from 'twrnc';
-import { useEffect, useState } from 'react';
-import { Camera, CameraType } from 'expo-camera';
+import { useEffect, useRef, useState } from 'react';
+import { Camera, CameraType, FlashMode } from 'expo-camera';
 import * as Location from 'expo-location';
 import CryptoJS from 'crypto-js';
 import { AES_HASH_SECRET_KEY } from '@env';
 import axios from 'axios';
+import io from 'socket.io-client'
 
 export default function CameraPage({ route, navigate }) {
 
   const { tokenId, key } = route.params;
 
+  const [socket, setSocket] = useState(io('http://192.168.1.14:4000/realtime'));
+  const [processedImage, setProcessedImage] = useState(null);
+  const cameraRef = useRef(null)
+  const captureInterval = 50  // ms
+
   const [type, setType] = useState(CameraType.back);
   const [permission, requestPermission] = Camera.useCameraPermissions();
-  const [scannedData, setScannedData] = useState("");
-  const [scanning, setScanning] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState("");
-  const [location, setLocation] = useState<object>({});
 
-  const encryptEventData = (eventData: object) => {
-    const encryptedMessage = CryptoJS.AES.encrypt(JSON.stringify(eventData), AES_HASH_SECRET_KEY).toString();
-    return encryptedMessage;
+  const setupSocketListeners = async () => {
+    socket.on("connect", () => {
+      console.log("Connected to the server");
+    })
+
+    socket.on("disconnect", () => {
+      console.log("Disconnected from the server");
+    })
+
+    socket.on("processedImage", (processedImageData) => {
+      setProcessedImage(processedImageData);
+    })
   }
+  useEffect(() => {
+
+    setupSocketListeners();
+
+    // Callback for when the camera is ready
+    const onCameraReady = async () => {
+      try {
+        if (cameraRef.current) {
+          let photo = cameraRef.current!.takePictureAsync({ base64: true });
+          socket.emit('cameraFrame', photo.base64);
+        }
+      } catch (error) {
+        console.error('Error capturing and sending frame:', error);
+      }
+    };
+
+    const capInterval = setInterval(onCameraReady, 1000)
+
+    // Clean up the Socket.io connection when the component unmounts
+    return () => {
+      clearInterval(capInterval)
+      socket.disconnect();
+    };
+  }, []);
+
 
   const [asset, setAsset] = useState({
     history: [{
@@ -71,83 +107,6 @@ export default function CameraPage({ route, navigate }) {
 
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      // Request permissions for accessing location
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        // Handle permission denied
-        return;
-      }
-
-      // Retrieve current location
-      const { coords } = await Location.getCurrentPositionAsync({});
-      setLocation(coords);
-    })();
-  }, [scanning]);
-
-
-  useEffect(() => {
-    if (scannedData) {
-
-      const qrCodeDataArr = scannedData.split("-");
-      if (qrCodeDataArr.length != 4) {
-        return Alert.alert("Data format doesn't meet requirements: ", scannedData);
-      }
-
-      if (selectedEvent == "") {
-        return Alert.alert("Please select event type.", "Please specify the event type.");
-      }
-
-      const date = Date.now();
-
-      const eventData = {
-        key: selectedEvent,
-        nftAddress: qrCodeDataArr[0],
-        marketplaceTokenId: qrCodeDataArr[1],
-        openseaTokenId: qrCodeDataArr[2],
-        buyer: qrCodeDataArr[3],
-        location: location,
-        date: date.toString()
-      }
-
-      const sendPostRequest = async () => {
-        try {
-          const response = await fetch('http://192.168.1.16:4000/save-real-item-history', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ data: encryptEventData(eventData) }), // Replace with your request payload
-          });
-
-          if (response.ok) {
-            // Request was successful
-            const data = await response.json();
-            if (data.err) {
-              Alert.alert('Request not successful', scannedData);
-              setScannedData("");
-
-            } else if (data.activeItem) {
-
-              Alert.alert('Operation successfully recorded', `Real item for NFT with tokenId ${eventData.openseaTokenId}, with owner ${eventData.buyer} is successfully recorded.`);
-              setScannedData("");
-
-            }
-          } else {
-            // Request failed
-            console.log('Request failed with status:', response.status);
-          }
-        } catch (error) {
-          console.log('Error:', error);
-        }
-      };
-
-      sendPostRequest();
-    }
-  }, [scanning]);
-
-
   if (!permission) {
     // Camera permissions are still loading
     return <View />;
@@ -163,30 +122,20 @@ export default function CameraPage({ route, navigate }) {
     );
   }
 
-  function toggleCameraType() {
-    setType(current => (current === CameraType.back ? CameraType.front : CameraType.back));
-  }
-
-  interface BarcodeScannerData {
-    type: string,
-    data: string
-  }
-
-  const handleBarCodeScanned = ({ type, data }: BarcodeScannerData) => {
-    setScannedData(data);
-  };
-
-  const toggleScanning = () => {
-    setScanning(prevState => !prevState);
-  }
 
   return (
     <View style={tw`w-full h-full`}>
-      <Camera style={tw`w-full h-full`} type={type} onBarCodeScanned={scanning ? handleBarCodeScanned : undefined}>
-        <View style={tw`flex-1 flex p-8 justify-center items-center`}>
-          <Text style={tw`flex-1 text-slate-50 text-lg font-bold`}>Searching for target product...</Text>
-        </View>
+      <Camera style={tw`w-full h-72`} type={type} ref={(ref) => {
+        cameraRef.current = ref;
+      }}>
+
       </Camera >
+      {processedImage && (
+        <Image
+          source={{ uri: `data:image/png;base64,${processedImage}` }}
+          style={{ width: 200, height: 200 }}
+        />
+      )}
       <View style={tw`absolute bottom-0 h-12 w-full left-0 bg-slate-500/50 flex justify-center items-center`}>
         <Text style={tw`text-slate-50`}>{
           <Text>{calculateProductRecordInfoSpecificLocation(asset).targetKey} recorded out of {calculateProductRecordInfoSpecificLocation(asset).total} at {key.toUpperCase()} location</Text>

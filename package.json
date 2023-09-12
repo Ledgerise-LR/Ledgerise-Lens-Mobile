@@ -24,10 +24,11 @@
     "expo-status-bar": "~1.4.4",
     "react": "18.2.0",
     "react-native": "0.71.7",
-    "react-native-camera": "^4.2.1",
     "react-native-dotenv": "^3.4.8",
     "react-native-dropdown-picker": "^5.4.6",
     "react-native-permissions": "^3.8.0",
+    "react-native-vision-camera": "^3.0.0",
+    "socket.io-client": "^4.7.2",
     "twrnc": "^3.6.0"
   },
   "devDependencies": {
