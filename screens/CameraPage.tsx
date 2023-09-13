@@ -30,9 +30,22 @@ export default function CameraPage({ route, navigate }) {
     })
 
     socket.on("processedImage", (processedImageData) => {
+      console.log("processedImageData")
       setProcessedImage(processedImageData);
     })
+
+    await cameraRef.current?.initializeAsync();
   }
+
+  const sendImageChunks = async (socket: any, imageBase64: any) => {
+    const chunkSize = 10000;
+    for (let offset = 0; offset < imageBase64.length; offset += chunkSize) {
+      const chunk = imageBase64.substring(offset, offset + chunkSize);
+      socket.emit('cameraFrame', chunk);
+    }
+    socket.emit('cameraFrame', 'done');
+  };
+
   useEffect(() => {
 
     setupSocketListeners();
@@ -42,7 +55,9 @@ export default function CameraPage({ route, navigate }) {
       try {
         if (cameraRef.current) {
           let photo = cameraRef.current!.takePictureAsync({ base64: true });
-          socket.emit('cameraFrame', photo.base64);
+          const base64 = (await photo);
+          const base64Data = `${base64.base64}`
+          await sendImageChunks(socket, base64Data);
         }
       } catch (error) {
         console.error('Error capturing and sending frame:', error);
