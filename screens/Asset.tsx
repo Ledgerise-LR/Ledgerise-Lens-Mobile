@@ -5,6 +5,7 @@ import tw from 'twrnc';
 import { useEffect, useState } from 'react';
 
 import axios from 'axios';
+import { SERVER_URL } from '@env';
 
 
 export default function Asset({ route, navigation }) {

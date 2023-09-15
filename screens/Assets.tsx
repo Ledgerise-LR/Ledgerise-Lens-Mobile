@@ -3,6 +3,7 @@ import tw from 'twrnc';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import AssetBox from '../components/AssetBox';
+import { SERVER_URL } from '@env';
 
 export default function Assets({ route, navigation }) {
 

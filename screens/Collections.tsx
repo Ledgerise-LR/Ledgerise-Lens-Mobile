@@ -6,6 +6,7 @@ import axios from "axios";
 import CollectionBox from '../components/CollectionBox';
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+import { SERVER_URL } from '@env';
 
 
 export default function Collections({ navigation }) {
@@ -14,7 +15,7 @@ export default function Collections({ navigation }) {
 
   useEffect(() => {
 
-    const url = "http://192.168.1.14:4000/get-all-collections";
+    const url = `http://192.168.1.14:4000/get-all-collections`;
 
     axios.get(url)
       .then(res => {
