@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Button, TouchableOpacity, Alert, ScrollView, Image } from 'react-native';
+import { StyleSheet, Text, View, Button, Dimensions } from 'react-native';
 import tw from 'twrnc';
 import { useEffect, useRef, useState } from 'react';
 import { Camera, CameraType } from 'expo-camera';
@@ -7,8 +7,8 @@ import CryptoJS from 'crypto-js';
 import { SERVER_URL } from '@env';
 import axios from 'axios';
 import io from 'socket.io-client'
-import Svg, { Rect } from 'react-native-svg';
-import pako from 'pako';
+import React from 'react';
+import { Svg, Rect } from "react-native-svg";
 
 export default function CameraPage({ route, navigate }) {
 
@@ -30,6 +30,12 @@ export default function CameraPage({ route, navigate }) {
 
   const [foundStatus, setFoundStatus] = useState(false);
 
+  const [isScanning, setIsScanning] = useState(true);
+
+  setTimeout(() => {
+    setIsScanning(true);
+  }, 3000)
+
   const setupSocketListeners = async () => {
     socket.on("connect", () => {
       console.log("Connected to the server");
@@ -39,33 +45,28 @@ export default function CameraPage({ route, navigate }) {
       console.log("Disconnected from the server");
     })
 
-    socket.on("processedImage", (processedImageData) => {
+    socket.on("processedImage", (processedImageData: any) => {
+      console.log(processedImageData)
       if (processedImageData["found_status"] == "false") {
         setRectX(0);
         setRectY(0);
         setRectW(0);
         setRectH(0);
         setFoundStatus(false);
-      } else if (processedImageData["found_status"] != "true") {
+      } else if (processedImageData["found_status"] == "true") {
 
         setFoundStatus(true);
 
-        const x = processedImageData["coordinates_array"][0]
-        const y = processedImageData["coordinates_array"][1]
-        const w = processedImageData["coordinates_array"][2]
-        const h = processedImageData["coordinates_array"][3]
+        const x = processedImageData["coordinates_array"][0];
+        const w = processedImageData["coordinates_array"][1];
 
-        const scaleFactor = 96;
+        const y = processedImageData["coordinates_array"][2];
+        const h = processedImageData["coordinates_array"][3];
 
-        const svgX = x / scaleFactor;
-        const svgY = y / scaleFactor;
-        const svgWidth = w / scaleFactor;
-        const svgHeight = h / scaleFactor;
-
-        setRectX(svgX);
-        setRectY(svgY);
-        setRectW(svgWidth);
-        setRectH(svgHeight);
+        setRectX(x);
+        setRectY(y);
+        setRectW(w);
+        setRectH(h);
       }
       setProcessedImage(processedImageData);
     })
@@ -75,10 +76,10 @@ export default function CameraPage({ route, navigate }) {
 
   useEffect(() => {
     ;
-  }, [foundStatus]);
+  }, [foundStatus, rectX, rectY, rectW, rectH]);
 
   const sendImageChunks = async (socket: any, imageBase64: any) => {
-    const chunkSize = 1024;
+    const chunkSize = 10000;
     for (let offset = 0; offset < imageBase64.length; offset += chunkSize) {
       const chunk = imageBase64.substring(offset, offset + chunkSize);
       socket.emit('cameraFrame', chunk);
@@ -86,32 +87,36 @@ export default function CameraPage({ route, navigate }) {
     socket.emit('cameraFrame', 'done');
   };
 
+  const onCameraReady = async () => {
+    try {
+      if (cameraRef.current) {
+        let photo = cameraRef.current!.takePictureAsync({ base64: true, quality: 0.1 });
+        const base64 = (await photo);
+
+        await sendImageChunks(socket, base64.base64);
+      }
+    } catch (error) {
+      console.error('Error capturing and sending frame:', error);
+    }
+  };
+
+
   useEffect(() => {
 
     setupSocketListeners();
 
-    // Callback for when the camera is ready
-    const onCameraReady = async () => {
-      try {
-        if (cameraRef.current) {
-          let photo = cameraRef.current!.takePictureAsync({ base64: true, quality: 0.1 });
-          const base64 = (await photo);
+    let capInterval: any
 
-          await sendImageChunks(socket, base64.base64);
-        }
-      } catch (error) {
-        console.error('Error capturing and sending frame:', error);
-      }
-    };
-
-    const capInterval = setInterval(onCameraReady, 5000)
+    if (isScanning) {
+      capInterval = setInterval(onCameraReady, 2500);
+    }
 
     // Clean up the Socket.io connection when the component unmounts
     return () => {
       clearInterval(capInterval)
       socket.disconnect();
     };
-  }, []);
+  }, [isScanning]);
 
 
   const [asset, setAsset] = useState({
@@ -186,10 +191,29 @@ export default function CameraPage({ route, navigate }) {
         type={type} ref={(ref) => {
           cameraRef.current = ref;
         }}>
+        <View style={tw`w-full flex justify-center`}>
+          {
+            foundStatus
+              ? (<Text style={tw`text-slate-100 text-xl bg-green-400 p-5 flex justify-center items-center`}>Found</Text>)
+              : (<Text style={tw`text-slate-100 text-xl p-5 flex justify-center items-center`}>Searching for product...</Text>)
+          }
+        </View>
 
-        {
-          foundStatus ? (<Text style={tw`text-slate-100`}>Found</Text>) : (<Text style={tw`text-slate-100`}>Searching for product...</Text>)
-        }
+        <Svg
+          width="100%"
+          height="100%"
+          preserveAspectRatio="none"
+        >
+          <Rect
+            x={rectX}
+            y={rectY}
+            width={rectW}
+            height={rectH}
+            stroke="green"
+            strokeWidth="5"
+            fill="transparent"
+          />
+        </Svg>
 
       </Camera >
 

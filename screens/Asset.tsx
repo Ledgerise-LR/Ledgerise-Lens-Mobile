@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 
 import axios from 'axios';
 import { SERVER_URL } from '@env';
+import React from 'react';
 
 
 export default function Asset({ route, navigation }) {

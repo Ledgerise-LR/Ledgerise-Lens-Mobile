@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Button, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, ScrollView } from 'react-native';
 import tw from 'twrnc';
 import { useEffect, useState } from 'react';
 import CryptoJS from 'crypto-js';
@@ -7,10 +7,12 @@ import CollectionBox from '../components/CollectionBox';
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { SERVER_URL } from '@env';
+import React from 'react';
 
 
 export default function Collections({ navigation }) {
 
+  const windowDimension = Dimensions.get("screen")
   const [collections, setCollections] = useState([]);
 
   useEffect(() => {

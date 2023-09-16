@@ -16,13 +16,21 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.Nft-Fundraising-Mobile-App"
+      "bundleIdentifier": "com.anonymous.Nft-Fundraising-Mobile-App",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Ledgerise needs access to your Camera."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "host.exp.exponent"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -32,6 +40,12 @@
         "expo-camera",
         {
           "cameraPermission": "Allow to access your camera."
+        }
+      ],
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "Ledgerise needs access to your Camera."
         }
       ]
     ]
