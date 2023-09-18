@@ -15,7 +15,6 @@ export default function CameraPage({ route, navigate }) {
   const { tokenId, key } = route.params;
 
   const [socket, setSocket] = useState(io(`http://192.168.1.14:4000/realtime`));
-  const [processedImage, setProcessedImage] = useState("");
   const cameraRef = useRef(null)
   const captureInterval = 50  // ms
 
@@ -68,7 +67,6 @@ export default function CameraPage({ route, navigate }) {
         setRectW(w);
         setRectH(h);
       }
-      setProcessedImage(processedImageData);
     })
 
     await cameraRef.current?.initializeAsync();
@@ -108,7 +106,7 @@ export default function CameraPage({ route, navigate }) {
     let capInterval: any
 
     if (isScanning) {
-      capInterval = setInterval(onCameraReady, 2500);
+      capInterval = setInterval(onCameraReady, 3000);
     }
 
     // Clean up the Socket.io connection when the component unmounts

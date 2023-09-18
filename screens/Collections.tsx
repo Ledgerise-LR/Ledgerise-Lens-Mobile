@@ -12,7 +12,7 @@ import React from 'react';
 
 export default function Collections({ navigation }) {
 
-  const windowDimension = Dimensions.get("screen")
+  const windowDimension = Dimensions.get("window")
   const [collections, setCollections] = useState([]);
 
   useEffect(() => {
