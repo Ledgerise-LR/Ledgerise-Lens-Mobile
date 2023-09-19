@@ -88,7 +88,7 @@ export default function CameraPage({ route, navigate }) {
   const onCameraReady = async () => {
     try {
       if (cameraRef.current) {
-        let photo = cameraRef.current!.takePictureAsync({ base64: true, quality: 0.1 });
+        let photo = cameraRef.current!.takePictureAsync({ base64: true, quality: 0.25 });
         const base64 = (await photo);
 
         await sendImageChunks(socket, base64.base64);
