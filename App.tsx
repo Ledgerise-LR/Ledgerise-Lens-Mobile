@@ -5,6 +5,7 @@ import Collections from "./screens/Collections";
 import Assets from "./screens/Assets";
 import Asset from "./screens/Asset";
 import CameraPage from "./screens/CameraPage";
+import React from "react";
 
 
 const Stack = createStackNavigator();

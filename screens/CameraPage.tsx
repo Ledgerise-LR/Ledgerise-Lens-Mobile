@@ -27,6 +27,9 @@ export default function CameraPage({ route, navigate }) {
   const [rectW, setRectW] = useState(0);
   const [rectH, setRectH] = useState(0);
 
+  const [location, setLocation] = useState<Object>({});
+  const [isProcessing, setIsProcessing] = useState<String>("");
+
   const [foundStatus, setFoundStatus] = useState(false);
 
   const [isScanning, setIsScanning] = useState(true);
@@ -44,8 +47,9 @@ export default function CameraPage({ route, navigate }) {
       console.log("Disconnected from the server");
     })
 
-    socket.on("processedImage", (processedImageData: any) => {
+    socket.on("processedImage", async (processedImageData: any) => {
       console.log(processedImageData)
+      const userInfo = processedImageData["user_info"];
       if (processedImageData["found_status"] == "false") {
         setRectX(0);
         setRectY(0);
@@ -82,6 +86,18 @@ export default function CameraPage({ route, navigate }) {
       const chunk = imageBase64.substring(offset, offset + chunkSize);
       socket.emit('cameraFrame', chunk);
     }
+
+    const { coords } = await Location.getCurrentPositionAsync({});
+    const date = Date.now();
+
+    setLocation(coords);
+
+    socket.emit('cameraFrame', {
+      socketCallKey: "locationAndDate",
+      location: location,
+      date: date.toString(),
+      key: key
+    })
     socket.emit('cameraFrame', 'done');
   };
 
