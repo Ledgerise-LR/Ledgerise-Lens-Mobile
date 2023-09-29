@@ -9,6 +9,7 @@ import axios from 'axios';
 import io from 'socket.io-client'
 import React from 'react';
 import { Svg, Rect } from "react-native-svg";
+import { manipulateAsync, FlipType, SaveFormat } from 'expo-image-manipulator';
 
 export default function CameraPage({ route, navigate }) {
 
@@ -30,9 +31,14 @@ export default function CameraPage({ route, navigate }) {
   const [location, setLocation] = useState<Object>({});
   const [isProcessing, setIsProcessing] = useState<String>("");
 
-  const [foundStatus, setFoundStatus] = useState(false);
+  const [foundStatus, setFoundStatus] = useState<Boolean>(false);
 
-  const [isScanning, setIsScanning] = useState(true);
+  const [isScanning, setIsScanning] = useState<Boolean>(true);
+
+  const [isAlreadyVerified, setIsAlreadyVerified] = useState<Boolean>(false);
+  const [isErrorOccured, setIsErrorOccured] = useState<Boolean>(false);
+  const [isUploadInProgress, setIsUploadInProgress] = useState<Boolean>(false);
+  const [isUploadComplete, setIsUploadComplete] = useState<Boolean>(false);
 
   setTimeout(() => {
     setIsScanning(true);
@@ -48,7 +54,11 @@ export default function CameraPage({ route, navigate }) {
     })
 
     socket.on("processedImage", async (processedImageData: any) => {
+      setIsAlreadyVerified(false);
+      setIsErrorOccured(false);
+
       console.log(processedImageData)
+
       const userInfo = processedImageData["user_info"];
       if (processedImageData["found_status"] == "false") {
         setRectX(0);
@@ -56,7 +66,7 @@ export default function CameraPage({ route, navigate }) {
         setRectW(0);
         setRectH(0);
         setFoundStatus(false);
-      } else if (processedImageData["found_status"] == "true") {
+      } else if (processedImageData["found_status"] == "true" && userInfo != "None") {
 
         setFoundStatus(true);
 
@@ -70,6 +80,17 @@ export default function CameraPage({ route, navigate }) {
         setRectY(y);
         setRectW(w);
         setRectH(h);
+
+        setIsUploadInProgress(true);
+
+        socket.on("upload", async (data: string) => {
+          if (data == "error") return setIsErrorOccured(true);
+          else if (data == "already_verified") return setIsAlreadyVerified(true);
+          else if (data == "complete") {
+            setIsUploadInProgress(false)
+            return setIsUploadComplete(true)
+          };
+        })
       }
     })
 
@@ -79,6 +100,10 @@ export default function CameraPage({ route, navigate }) {
   useEffect(() => {
     ;
   }, [foundStatus, rectX, rectY, rectW, rectH]);
+
+  useEffect(() => {
+    ;
+  }, [isAlreadyVerified, isErrorOccured, isUploadComplete, isUploadInProgress])
 
   const sendImageChunks = async (socket: any, imageBase64: any) => {
     const chunkSize = 10000;
@@ -92,22 +117,34 @@ export default function CameraPage({ route, navigate }) {
 
     setLocation(coords);
 
-    socket.emit('cameraFrame', {
+    await socket.emit('cameraFrame', {
       socketCallKey: "locationAndDate",
-      location: location,
+      location: {
+        latitude: coords.latitude,
+        longitude: coords.longitude
+      },
       date: date.toString(),
       key: key
     })
-    socket.emit('cameraFrame', 'done');
+    await socket.emit('cameraFrame', 'done');
   };
 
   const onCameraReady = async () => {
     try {
       if (cameraRef.current) {
-        let photo = cameraRef.current!.takePictureAsync({ base64: true, quality: 0.25 });
-        const base64 = (await photo);
+        let photo = cameraRef.current!.takePictureAsync({ quality: 0.1, skipProcessing: true });
+        const image = (await photo);
 
-        await sendImageChunks(socket, base64.base64);
+        const width: number = 375
+        const height: number = 650
+
+        const compressedImage = await manipulateAsync(
+          image.uri,
+          [{ resize: { width: width, height: height } }],
+          { compress: 0.25, base64: true }
+        )
+
+        await sendImageChunks(socket, compressedImage.base64);
       }
     } catch (error) {
       console.error('Error capturing and sending frame:', error);
@@ -208,7 +245,15 @@ export default function CameraPage({ route, navigate }) {
         <View style={tw`w-full flex justify-center`}>
           {
             foundStatus
-              ? (<Text style={tw`text-slate-100 text-xl bg-green-400 p-5 flex justify-center items-center`}>Found</Text>)
+              ? isErrorOccured
+                ? (<Text style={tw`text-slate-100 text-xl p-5 flex justify-center items-center`}>Found: an error occured.</Text>)
+                : isAlreadyVerified
+                  ? (<Text style={tw`text-slate-100 bg-blue-400 text-xl p-5 flex justify-center items-center`}>Found: but already verified.</Text>)
+                  : isUploadInProgress
+                    ? (<Text style={tw`text-slate-100 bg-green-600 text-xl p-5 flex justify-center items-center`}>Found: upload in progress.</Text>)
+                    : isUploadComplete
+                      ? (<Text style={tw`text-slate-100 bg-green-400 text-xl p-5 flex justify-center items-center`}>Found: upload complete, item verified!</Text>)
+                      : (<Text style={tw`text-slate-100 text-xl bg-green-400 p-5 flex justify-center items-center`}>Found</Text>)
               : (<Text style={tw`text-slate-100 text-xl p-5 flex justify-center items-center`}>Searching for product...</Text>)
           }
         </View>
