@@ -5,6 +5,7 @@ import tw from 'twrnc';
 import { useEffect, useState } from 'react';
 
 import axios from 'axios';
+import React from 'react';
 
 
 export default function AssetBox({ navigation, tokenUri, tokenId }) {
@@ -34,8 +35,8 @@ export default function AssetBox({ navigation, tokenUri, tokenId }) {
   }, [])
 
   return (
-    <View style={tw`mb-12 border w-2/3 p-4 rounded-xl bg-slate-100`}>
-      <View style={tw`h-42 aspect-square mb-4 border rounded-xl overflow-hidden`}>
+    <View style={tw`mb-12 border w-full p-4 rounded-xl bg-slate-100`}>
+      <View style={tw`h-60 aspect-square mb-4 border rounded-xl overflow-hidden`}>
         <Image
           style={tw`h-full w-full rounded-xl`}
           source={{

@@ -77,16 +77,17 @@ export default function Asset({ route, navigation }) {
     }
 
     for (let i = 0; i < targetAsset.real_item_history.length; i++) {
-      const eachHistoryEvent = targetAsset.real_item_history[i];
+      for (let j = 0; j < targetAsset.real_item_history[i].length; j++) {
+        const eachHistoryEvent = targetAsset.real_item_history[i][j];
 
-      if (eachHistoryEvent.key == "stamp") {
-        stampCount++;
-      } else if (eachHistoryEvent.key == "shipped") {
-        shipCount++;
-      } else if (eachHistoryEvent.key == "delivered") {
-        deliverCount++;
+        if (eachHistoryEvent.key == "stamp") {
+          stampCount++;
+        } else if (eachHistoryEvent.key == "shipped") {
+          shipCount++;
+        } else if (eachHistoryEvent.key == "delivered") {
+          deliverCount++;
+        }
       }
-
     }
 
 
