@@ -3,6 +3,7 @@
 import { StyleSheet, Text, View, Button, TouchableOpacity, Alert, Image, ScrollView } from 'react-native';
 import tw from 'twrnc';
 import { useEffect, useState } from 'react';
+import React from 'react';
 
 export default function CollectionBox({ navigation, collectionName, itemId, collectionPhoto }) {
 

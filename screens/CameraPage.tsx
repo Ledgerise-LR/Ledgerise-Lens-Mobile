@@ -28,6 +28,8 @@ export default function CameraPage({ route, navigate }) {
   const [rectW, setRectW] = useState(0);
   const [rectH, setRectH] = useState(0);
 
+  const [isLocationSet, setIsLocationSet] = useState<Boolean>(false);
+
   const [location, setLocation] = useState<Object>({ latitude: 0, longitude: 0 });
   const [date, setDate] = useState<number>(0);
   const [isProcessing, setIsProcessing] = useState<Boolean>(false);
@@ -35,6 +37,8 @@ export default function CameraPage({ route, navigate }) {
   const [foundStatus, setFoundStatus] = useState<Boolean>(false);
 
   const [isScanning, setIsScanning] = useState<Boolean>(false);
+
+  const [isAnalyzing, setIsAnalyzing] = useState<Boolean>(false);
 
   const [isAlreadyVerified, setIsAlreadyVerified] = useState<Boolean>(false);
   const [isErrorOccured, setIsErrorOccured] = useState<Boolean>(false);
@@ -62,10 +66,11 @@ export default function CameraPage({ route, navigate }) {
         longitude: coords.longitude
       });
       setDate(date);
-      console.log("set")
+      setIsLocationSet(true);
     })
 
     socket.on("disconnect", () => {
+      setIsLocationSet(false);
       console.log("Disconnected from the server");
     })
 
@@ -73,7 +78,7 @@ export default function CameraPage({ route, navigate }) {
       setIsAlreadyVerified(false);
       setIsErrorOccured(false);
 
-      console.log(processedImageData)
+      // console.log(processedImageData)
 
       if (processedImageData["found_status"] == "false") {
         setRectX(0);
@@ -122,7 +127,7 @@ export default function CameraPage({ route, navigate }) {
 
   useEffect(() => {
     ;
-  }, [isAlreadyVerified, isErrorOccured, isUploadComplete, isUploadInProgress])
+  }, [isAlreadyVerified, isErrorOccured, isUploadComplete, isUploadInProgress, isLocationSet])
 
   const sendImageChunks = async (socket: any, imageBase64: any, scannedData: string) => {
     if (imageBase64.length <= 0) return setIsProcessing(false);
@@ -291,13 +296,18 @@ export default function CameraPage({ route, navigate }) {
                 : isAlreadyVerified
                   ? (<Text style={tw`text-slate-100 bg-blue-400 text-xl p-5 flex justify-center items-center`}>Found: but already verified.</Text>)
                   : incompatibleData
-                    ? (<Text style={tw`text-slate-100 bg-red-400 text-xl p-5 flex justify-center items-center`}>Found: but data doesn't satisfy standards.</Text>)
+                    ? (<Text style={tw`text-slate-100 bg-red-400 text-xl p-5 flex justify-center items-center`}>Found: but incompatible data</Text>)
                     : isUploadInProgress
                       ? (<Text style={tw`text-slate-100 bg-green-600 text-xl p-5 flex justify-center items-center`}>Found: upload in progress.</Text>)
                       : isUploadComplete
                         ? (<Text style={tw`text-slate-100 bg-green-400 text-xl p-5 flex justify-center items-center`}>Found: upload complete, item verified!</Text>)
                         : (<Text style={tw`text-slate-100 text-xl bg-green-400 p-5 flex justify-center items-center`}>Found</Text>)
-              : (<Text style={tw`text-slate-100 text-xl p-5 flex justify-center items-center`}>Searching for product...</Text>)
+              : isLocationSet
+                ? isProcessing
+                  ? (<Text style={tw`text-slate-800 bg-orange-500 text-xl p-5 flex justify-center items-center`}>Analyzing... Please wait.</Text>)
+                  : (<Text style={tw`text-slate-100 text-xl p-5 flex justify-center items-center`}>Searching for product...</Text>)
+                : (<Text style={tw`bg-yellow-500 text-slate-800 text-xl p-5 flex justify-center items-center`}>Fetching location, please wait.</Text>)
+
           }
         </View>
 
