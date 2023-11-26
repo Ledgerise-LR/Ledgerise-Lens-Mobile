@@ -40,8 +40,8 @@ export default function CameraPage({ route, navigate }) {
 
   const [isAnalyzing, setIsAnalyzing] = useState<Boolean>(false);
 
-  const [qrArrayLength, setQrArrayLength] = useState<Number>(0);
-  const [currentDonorIndex, setCurrentDonorIndex] = useState<Number>(0);
+  const [qrArrayLength, setQrArrayLength] = useState<number>(0);
+  const [currentDonorIndex, setCurrentDonorIndex] = useState<number>(0);
 
   const [isAlreadyVerified, setIsAlreadyVerified] = useState<Boolean>(false);
   const [isErrorOccured, setIsErrorOccured] = useState<Boolean>(false);
@@ -81,7 +81,7 @@ export default function CameraPage({ route, navigate }) {
       setIsAlreadyVerified(false);
       setIsErrorOccured(false);
 
-      // (processedImageData);
+      console.log(processedImageData);
 
       if (processedImageData["found_status"] == "false") {
         setRectX(0);
@@ -109,7 +109,8 @@ export default function CameraPage({ route, navigate }) {
         setIsUploadInProgress(true);
 
         socket.on("upload", async (data: string) => {
-          if (currentDonorIndex == qrArrayLength) {
+          console.log(data)
+          if ((currentDonorIndex + 1) == qrArrayLength) {
             setIsProcessing(false);
           }
           const message = data.split("-")[0];
