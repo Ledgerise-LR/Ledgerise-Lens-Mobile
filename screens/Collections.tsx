@@ -17,7 +17,7 @@ export default function Collections({ navigation }) {
 
   useEffect(() => {
 
-    const url = `http://192.168.1.14:4000/get-all-collections`;
+    const url = `http://192.168.1.7:4000/get-all-collections`;
 
     axios.get(url)
       .then(res => {

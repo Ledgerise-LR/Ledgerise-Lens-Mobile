@@ -29,7 +29,7 @@ export default function Asset({ route, navigation }) {
 
   useEffect(() => {
 
-    const url = `http://192.168.1.14:4000/get-asset?tokenId=${tokenId}`;
+    const url = `http://192.168.1.7:4000/get-asset?tokenId=${tokenId}`;
 
     axios.get(url)
       .then(res => {

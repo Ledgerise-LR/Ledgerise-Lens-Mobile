@@ -15,7 +15,7 @@ export default function CameraPage({ route, navigate }) {
 
   const { tokenId, key } = route.params;
 
-  const [socket, setSocket] = useState(io(`http://192.168.1.14:4000/realtime`));
+  const [socket, setSocket] = useState(io(`http://192.168.1.7:4000/realtime`));
   const cameraRef = useRef(null)
   const captureInterval = 50  // ms
 
@@ -39,6 +39,9 @@ export default function CameraPage({ route, navigate }) {
   const [isScanning, setIsScanning] = useState<Boolean>(false);
 
   const [isAnalyzing, setIsAnalyzing] = useState<Boolean>(false);
+
+  const [qrArrayLength, setQrArrayLength] = useState<Number>(0);
+  const [currentDonorIndex, setCurrentDonorIndex] = useState<Number>(0);
 
   const [isAlreadyVerified, setIsAlreadyVerified] = useState<Boolean>(false);
   const [isErrorOccured, setIsErrorOccured] = useState<Boolean>(false);
@@ -78,7 +81,7 @@ export default function CameraPage({ route, navigate }) {
       setIsAlreadyVerified(false);
       setIsErrorOccured(false);
 
-      // console.log(processedImageData)
+      // (processedImageData);
 
       if (processedImageData["found_status"] == "false") {
         setRectX(0);
@@ -106,11 +109,16 @@ export default function CameraPage({ route, navigate }) {
         setIsUploadInProgress(true);
 
         socket.on("upload", async (data: string) => {
-          setIsProcessing(false);
-          if (data == "error") return setIsErrorOccured(true);
-          else if (data == "already_verified") return setIsAlreadyVerified(true);
-          else if (data == "incompatible_data") return setIncompatibleData(true);
-          else if (data == "complete") {
+          if (currentDonorIndex == qrArrayLength) {
+            setIsProcessing(false);
+          }
+          const message = data.split("-")[0];
+          const donorIndex = parseInt(data.split("-")[1]);
+          setCurrentDonorIndex(donorIndex);
+          if (message == "error") return setIsErrorOccured(true);
+          else if (message == "already_verified") return setIsAlreadyVerified(true);
+          else if (message == "incompatible_data") return setIncompatibleData(true);
+          else if (message == "complete") {
             setIsUploadInProgress(false)
             setIsUploadComplete(true)
           };
@@ -127,7 +135,7 @@ export default function CameraPage({ route, navigate }) {
 
   useEffect(() => {
     ;
-  }, [isAlreadyVerified, isErrorOccured, isUploadComplete, isUploadInProgress, isLocationSet])
+  }, [isAlreadyVerified, isErrorOccured, isUploadComplete, isUploadInProgress, isLocationSet, isProcessing])
 
   const sendImageChunks = async (socket: any, imageBase64: any, scannedData: string) => {
     if (imageBase64.length <= 0) return setIsProcessing(false);
@@ -155,8 +163,7 @@ export default function CameraPage({ route, navigate }) {
   const onCameraReady = async (scannedData: string) => {
     try {
       if (cameraRef.current) {
-
-
+        setQrArrayLength(JSON.parse(scannedData).length);
         let photo = cameraRef.current!.takePictureAsync({ quality: 0.1, skipProcessing: true });
         const image = (await photo);
 
@@ -166,7 +173,7 @@ export default function CameraPage({ route, navigate }) {
         const compressedImage = await manipulateAsync(
           image.uri,
           [{ resize: { width: width, height: height } }],
-          { compress: 0.1, base64: true }
+          { compress: 0.0, base64: true }
         )
 
         await sendImageChunks(socket, compressedImage.base64, scannedData);
@@ -243,7 +250,7 @@ export default function CameraPage({ route, navigate }) {
 
   useEffect(() => {
 
-    const url = `http://192.168.1.14:4000/get-asset?tokenId=${tokenId}`;
+    const url = `http://192.168.1.7:4000/get-asset?tokenId=${tokenId}`;
 
     axios.get(url)
       .then(res => {
@@ -292,21 +299,21 @@ export default function CameraPage({ route, navigate }) {
           {
             foundStatus
               ? isErrorOccured
-                ? (<Text style={tw`text-slate-100 text-xl p-5 flex justify-center items-center`}>Found: an error occured.</Text>)
+                ? (<Text style={tw`text-slate-100 p-5 flex justify-center items-center`}>Found: an error occured. ({currentDonorIndex.toString()} / {qrArrayLength.toString()})</Text>)
                 : isAlreadyVerified
-                  ? (<Text style={tw`text-slate-100 bg-blue-400 text-xl p-5 flex justify-center items-center`}>Found: but already verified.</Text>)
+                  ? (<Text style={tw`text-slate-100 bg-blue-400 p-5 flex justify-center items-center`}>Found: but already verified. ({currentDonorIndex.toString()} / {qrArrayLength.toString()})</Text>)
                   : incompatibleData
-                    ? (<Text style={tw`text-slate-100 bg-red-400 text-xl p-5 flex justify-center items-center`}>Found: but incompatible data</Text>)
+                    ? (<Text style={tw`text-slate-100 bg-red-400 p-5 flex justify-center items-center`}>Found: but incompatible data. ({currentDonorIndex.toString()} / {qrArrayLength.toString()})</Text>)
                     : isUploadInProgress
-                      ? (<Text style={tw`text-slate-100 bg-green-600 text-xl p-5 flex justify-center items-center`}>Found: upload in progress.</Text>)
+                      ? (<Text style={tw`text-slate-100 bg-green-600 p-5 flex justify-center items-center`}>Found: upload in progress. ({currentDonorIndex.toString()} / {qrArrayLength.toString()})</Text>)
                       : isUploadComplete
-                        ? (<Text style={tw`text-slate-100 bg-green-400 text-xl p-5 flex justify-center items-center`}>Found: upload complete, item verified!</Text>)
+                        ? (<Text style={tw`text-slate-100 bg-green-400 p-5 flex justify-center items-center`}>Found: upload complete, item verified! ({currentDonorIndex.toString()} / {qrArrayLength.toString()})</Text>)
                         : (<Text style={tw`text-slate-100 text-xl bg-green-400 p-5 flex justify-center items-center`}>Found</Text>)
               : isLocationSet
                 ? isProcessing
-                  ? (<Text style={tw`text-slate-800 bg-orange-500 text-xl p-5 flex justify-center items-center`}>Analyzing... Please wait.</Text>)
-                  : (<Text style={tw`text-slate-100 text-xl p-5 flex justify-center items-center`}>Searching for product...</Text>)
-                : (<Text style={tw`bg-yellow-500 text-slate-800 text-xl p-5 flex justify-center items-center`}>Fetching location, please wait.</Text>)
+                  ? (<Text style={tw`text-slate-800 bg-orange-500 p-5 flex justify-center items-center`}>Analyzing... Please wait.</Text>)
+                  : (<Text style={tw`text-slate-100 p-5 flex justify-center items-center`}>Searching for product...</Text>)
+                : (<Text style={tw`bg-yellow-500 text-slate-800 p-5 flex justify-center items-center`}>Fetching location, please wait.</Text>)
 
           }
         </View>

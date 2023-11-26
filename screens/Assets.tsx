@@ -14,7 +14,7 @@ export default function Assets({ route, navigation }) {
 
   useEffect(() => {
 
-    const url = `http://192.168.1.14:4000/get-all-items-collection?subcollectionId=${collectionItemId}`;
+    const url = `http://192.168.1.7:4000/get-all-items-collection?subcollectionId=${collectionItemId}`;
 
     axios.get(url)
       .then((res) => {
