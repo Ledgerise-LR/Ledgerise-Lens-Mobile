@@ -5,11 +5,21 @@ import tw from 'twrnc';
 import { useEffect, useState } from 'react';
 
 import axios from 'axios';
-import { SERVER_URL } from '@env';
 import React from 'react';
 
 
 export default function Asset({ route, navigation }) {
+
+  useEffect(() => {
+    axios.get(`http://${process.env.SERVER_URL}/auth/authenticate-verifier`)
+      .then((res) => {
+        if (res.data.success && res.data.company) return { success: true, company: res.data.company };
+        if (!res.data.success && res.data.err) return navigation.navigate("Welcome")
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }, [])
 
   const { tokenId } = route.params
 
@@ -29,7 +39,7 @@ export default function Asset({ route, navigation }) {
 
   useEffect(() => {
 
-    const url = `http://192.168.1.7:4000/get-asset?tokenId=${tokenId}`;
+    const url = `http://${process.env.SERVER_URL}/get-asset?tokenId=${tokenId}`;
 
     axios.get(url)
       .then(res => {
@@ -130,7 +140,7 @@ export default function Asset({ route, navigation }) {
             <Text style={tw`font-700 text-slate-50`}>✓</Text>
           </View>) : ("")}
         </TouchableOpacity>
-        <TouchableOpacity style={tw`bg-slate-700 flex items-center justify-center w-1/3 h-10 rounded mr-2 ${stampDisabled ? `bg-slate-500` : ``}`} disabled={shippedDisabled} onPressOut={() => navigation.navigate("CameraPage", {
+        <TouchableOpacity style={tw`bg-slate-700 flex items-center justify-center w-1/3 h-10 rounded mr-2 ${shippedDisabled ? `bg-slate-500` : ``}`} disabled={shippedDisabled} onPressOut={() => navigation.navigate("CameraPage", {
           tokenId: tokenId,
           key: "shipped"
         })}>

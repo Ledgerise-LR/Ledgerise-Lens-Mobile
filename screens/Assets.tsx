@@ -3,7 +3,6 @@ import tw from 'twrnc';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import AssetBox from '../components/AssetBox';
-import { SERVER_URL } from '@env';
 import React from 'react';
 
 export default function Assets({ route, navigation }) {
@@ -13,8 +12,19 @@ export default function Assets({ route, navigation }) {
   const [assets, setAssets] = useState([]);
 
   useEffect(() => {
+    axios.get(`http://${process.env.SERVER_URL}/auth/authenticate-verifier`)
+      .then((res) => {
+        if (res.data.success && res.data.company) return { success: true, company: res.data.company };
+        if (!res.data.success && res.data.err) return navigation.navigate("Welcome")
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }, [])
 
-    const url = `http://192.168.1.7:4000/get-all-items-collection?subcollectionId=${collectionItemId}`;
+  useEffect(() => {
+
+    const url = `http://${process.env.SERVER_URL}/get-all-items-collection?subcollectionId=${collectionItemId}`;
 
     axios.get(url)
       .then((res) => {

@@ -4,18 +4,28 @@ import { useEffect, useRef, useState } from 'react';
 import { Camera, CameraType } from 'expo-camera';
 import * as Location from 'expo-location';
 import CryptoJS from 'crypto-js';
-import { SERVER_URL } from '@env';
 import axios from 'axios';
 import io from 'socket.io-client'
 import React from 'react';
 import { Svg, Rect } from "react-native-svg";
 import { manipulateAsync, FlipType, SaveFormat } from 'expo-image-manipulator';
 
-export default function CameraPage({ route, navigate }) {
+export default function CameraPage({ route, navigation }) {
+
+  useEffect(() => {
+    axios.get(`http://${process.env.SERVER_URL}/auth/authenticate-verifier`)
+      .then((res) => {
+        if (res.data.success && res.data.company) return { success: true, company: res.data.company };
+        if (!res.data.success && res.data.err) return navigation.navigate("Welcome")
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }, [])
 
   const { tokenId, key } = route.params;
 
-  const [socket, setSocket] = useState(io(`http://192.168.1.7:4000/realtime`));
+  const [socket, setSocket] = useState(io(`http://${process.env.SERVER_URL}/realtime`));
   const cameraRef = useRef(null)
   const captureInterval = 50  // ms
 
@@ -109,7 +119,6 @@ export default function CameraPage({ route, navigate }) {
         setIsUploadInProgress(true);
 
         socket.on("upload", async (data: string) => {
-          console.log(data)
           if ((currentDonorIndex + 1) == qrArrayLength) {
             setIsProcessing(false);
           }
@@ -251,7 +260,7 @@ export default function CameraPage({ route, navigate }) {
 
   useEffect(() => {
 
-    const url = `http://192.168.1.7:4000/get-asset?tokenId=${tokenId}`;
+    const url = `http://${process.env.SERVER_URL}/get-asset?tokenId=${tokenId}`;
 
     axios.get(url)
       .then(res => {

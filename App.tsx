@@ -5,6 +5,8 @@ import Collections from "./screens/Collections";
 import Assets from "./screens/Assets";
 import Asset from "./screens/Asset";
 import CameraPage from "./screens/CameraPage";
+import Auth from "./screens/Auth";
+import Welcome from "./screens/Welcome";
 import React from "react";
 
 
@@ -15,6 +17,16 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
+        <Stack.Screen
+          name="Welcome"
+          component={Welcome}
+          options={{ title: "Welcome" }}
+        />
+        <Stack.Screen
+          name="Auth"
+          component={Auth}
+          options={{ title: "Authenticate" }}
+        />
         <Stack.Screen
           name="Collections"
           component={Collections}

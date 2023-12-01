@@ -6,18 +6,27 @@ import axios from "axios";
 import CollectionBox from '../components/CollectionBox';
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { SERVER_URL } from '@env';
 import React from 'react';
 
 
 export default function Collections({ navigation }) {
 
-  const windowDimension = Dimensions.get("window")
   const [collections, setCollections] = useState([]);
 
   useEffect(() => {
+    axios.get(`http://${process.env.SERVER_URL}/auth/authenticate-verifier`)
+      .then((res) => {
+        if (res.data.success && res.data.company) return { success: true, company: res.data.company };
+        if (!res.data.success && res.data.err) return navigation.navigate("Welcome")
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }, [])
 
-    const url = `http://192.168.1.7:4000/get-all-collections`;
+  useEffect(() => {
+
+    const url = `http://${process.env.SERVER_URL}/get-all-collections`;
 
     axios.get(url)
       .then(res => {
