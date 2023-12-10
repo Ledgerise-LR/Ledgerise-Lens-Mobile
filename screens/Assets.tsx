@@ -14,29 +14,26 @@ export default function Assets({ route, navigation }) {
   useEffect(() => {
     axios.get(`http://${process.env.SERVER_URL}/auth/authenticate-verifier`)
       .then((res) => {
-        if (res.data.success && res.data.company) return { success: true, company: res.data.company };
+        if (res.data.success && res.data.company) {
+          const url = `http://${process.env.SERVER_URL}/get-all-items-collection?subcollectionId=${collectionItemId}`;
+
+          axios.get(url)
+            .then((res) => {
+              const data = res.data;
+              setAssets(data.activeItems);
+            })
+            .catch((err) => {
+              console.error(err);
+            })
+
+          return { success: true, company: res.data.company }
+        };
         if (!res.data.success && res.data.err) return navigation.navigate("Welcome")
       })
       .catch((err) => {
         console.log(err)
       })
   }, [])
-
-  useEffect(() => {
-
-    const url = `http://${process.env.SERVER_URL}/get-all-items-collection?subcollectionId=${collectionItemId}`;
-
-    axios.get(url)
-      .then((res) => {
-        const data = res.data;
-        setAssets(data.activeItems);
-      })
-      .catch((err) => {
-        console.error(err);
-      })
-
-
-  }, []);
 
   return (
     <ScrollView style={tw`w-full h-full p-8`}>

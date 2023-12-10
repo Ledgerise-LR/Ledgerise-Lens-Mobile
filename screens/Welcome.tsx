@@ -21,7 +21,7 @@ export default function Collections({ navigation }) {
   }, [])
 
   return (
-    <View style={tw`w-screen h-screen px-10 py-6`}>
+    <View style={tw`w-full h-full px-10 py-6`}>
       <View style={tw`w-full h-full`}>
         <View style={tw`w-full mb-8`}>
           <View style={tw`w-1/4 aspect-square mb-4 relative`}>

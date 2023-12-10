@@ -40,6 +40,8 @@ export default function Collections({ navigation }) {
             _id: res.data.company._id,
             code: res.data.company.code
           })
+        } else {
+          console.log(res)
         }
       })
   }
@@ -62,7 +64,7 @@ export default function Collections({ navigation }) {
 
 
   return (
-    <ScrollView style={tw`w-screen h-screen px-10 py-6`}>
+    <ScrollView style={tw`w-full h-full px-10 py-6`}>
       <View style={tw`w-full h-full`}>
         <View style={tw`w-full mb-8`}>
           <View style={tw`w-1/4 aspect-square mb-4 relative`}>

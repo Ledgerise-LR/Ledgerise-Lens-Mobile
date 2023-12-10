@@ -16,7 +16,19 @@ export default function Collections({ navigation }) {
   useEffect(() => {
     axios.get(`http://${process.env.SERVER_URL}/auth/authenticate-verifier`)
       .then((res) => {
-        if (res.data.success && res.data.company) return { success: true, company: res.data.company };
+        if (res.data.success && res.data.company) {
+          const url = `http://${process.env.SERVER_URL}/get-all-collections`;
+
+          axios.get(url)
+            .then(res => {
+              const data = res.data.subcollections;
+              setCollections(data);
+            })
+            .catch(error => {
+              console.error(error);
+            })
+          return { success: true, company: res.data.company }
+        };
         if (!res.data.success && res.data.err) return navigation.navigate("Welcome")
       })
       .catch((err) => {
@@ -24,20 +36,6 @@ export default function Collections({ navigation }) {
       })
   }, [])
 
-  useEffect(() => {
-
-    const url = `http://${process.env.SERVER_URL}/get-all-collections`;
-
-    axios.get(url)
-      .then(res => {
-        const data = res.data.subcollections;
-        setCollections(data);
-      })
-      .catch(error => {
-        console.error(error);
-      })
-
-  }, []);
 
   return (
     <ScrollView style={tw`w-full h-full p-8`}>

@@ -15,7 +15,16 @@ export default function CameraPage({ route, navigation }) {
   useEffect(() => {
     axios.get(`http://${process.env.SERVER_URL}/auth/authenticate-verifier`)
       .then((res) => {
-        if (res.data.success && res.data.company) return { success: true, company: res.data.company };
+        if (res.data.success && res.data.company) {
+          const url = `http://${process.env.SERVER_URL}/get-asset?tokenId=${tokenId}`;
+
+          axios.get(url)
+            .then(res => {
+              const data = res.data;
+              setAsset(data.activeItem);
+            })
+          return { success: true, company: res.data.company }
+        };
         if (!res.data.success && res.data.err) return navigation.navigate("Welcome")
       })
       .catch((err) => {
@@ -91,7 +100,7 @@ export default function CameraPage({ route, navigation }) {
       setIsAlreadyVerified(false);
       setIsErrorOccured(false);
 
-      console.log(processedImageData);
+      // console.log(processedImageData);
 
       if (processedImageData["found_status"] == "false") {
         setRectX(0);
@@ -119,11 +128,17 @@ export default function CameraPage({ route, navigation }) {
         setIsUploadInProgress(true);
 
         socket.on("upload", async (data: string) => {
-          if ((currentDonorIndex + 1) == qrArrayLength) {
-            setIsProcessing(false);
-          }
+
           const message = data.split("-")[0];
           const donorIndex = parseInt(data.split("-")[1]);
+          const lengthOfQrArray = parseInt(data.split("-")[2]);
+
+          if ((donorIndex + 1) == lengthOfQrArray) {
+            setQrArrayLength(0);
+            setCurrentDonorIndex(0);
+            return setIsProcessing(false);
+          }
+
           setCurrentDonorIndex(donorIndex);
           if (message == "error") return setIsErrorOccured(true);
           else if (message == "already_verified") return setIsAlreadyVerified(true);
@@ -145,7 +160,7 @@ export default function CameraPage({ route, navigation }) {
 
   useEffect(() => {
     ;
-  }, [isAlreadyVerified, isErrorOccured, isUploadComplete, isUploadInProgress, isLocationSet, isProcessing])
+  }, [isAlreadyVerified, isErrorOccured, isUploadComplete, isUploadInProgress, isLocationSet, isProcessing, qrArrayLength, currentDonorIndex]);
 
   const sendImageChunks = async (socket: any, imageBase64: any, scannedData: string) => {
     if (imageBase64.length <= 0) return setIsProcessing(false);
@@ -164,7 +179,7 @@ export default function CameraPage({ route, navigation }) {
       },
       date: date.toString(),
       key: key,
-      user_info: scannedData
+      user_info: scannedData.toString()
     })
 
     await socket.emit('cameraFrame', 'done');
@@ -173,8 +188,9 @@ export default function CameraPage({ route, navigation }) {
   const onCameraReady = async (scannedData: string) => {
     try {
       if (cameraRef.current) {
-        setQrArrayLength(JSON.parse(scannedData).length);
-        let photo = cameraRef.current!.takePictureAsync({ quality: 0.1, skipProcessing: true });
+        const length = JSON.parse(scannedData.split("-")[1]).length;
+        setQrArrayLength(length);
+        let photo = cameraRef.current!.takePictureAsync({ quality: 0.01, skipProcessing: true });
         const image = (await photo);
 
         const width: number = 375
@@ -190,7 +206,6 @@ export default function CameraPage({ route, navigation }) {
       }
     } catch (error) {
       console.log('Error capturing and sending frame:', error);
-      ;
     }
   };
 
@@ -258,18 +273,6 @@ export default function CameraPage({ route, navigation }) {
     }
   }
 
-  useEffect(() => {
-
-    const url = `http://${process.env.SERVER_URL}/get-asset?tokenId=${tokenId}`;
-
-    axios.get(url)
-      .then(res => {
-        const data = res.data;
-        setAsset(data.activeItem);
-      })
-
-  }, []);
-
   if (!permission) {
     // Camera permissions are still loading
     return <View />;
@@ -309,15 +312,15 @@ export default function CameraPage({ route, navigation }) {
           {
             foundStatus
               ? isErrorOccured
-                ? (<Text style={tw`text-slate-100 p-5 flex justify-center items-center`}>Found: an error occured. ({currentDonorIndex.toString()} / {qrArrayLength.toString()})</Text>)
+                ? (<Text style={tw`text-slate-100 p-5 flex justify-center items-center`}>Found: an error occured. ({(currentDonorIndex + 1).toString()} / {qrArrayLength.toString()})</Text>)
                 : isAlreadyVerified
-                  ? (<Text style={tw`text-slate-100 bg-blue-400 p-5 flex justify-center items-center`}>Found: but already verified. ({currentDonorIndex.toString()} / {qrArrayLength.toString()})</Text>)
+                  ? (<Text style={tw`text-slate-100 bg-blue-400 p-5 flex justify-center items-center`}>Found: but already verified. ({(currentDonorIndex + 1).toString()} / {qrArrayLength.toString()})</Text>)
                   : incompatibleData
-                    ? (<Text style={tw`text-slate-100 bg-red-400 p-5 flex justify-center items-center`}>Found: but incompatible data. ({currentDonorIndex.toString()} / {qrArrayLength.toString()})</Text>)
+                    ? (<Text style={tw`text-slate-100 bg-red-400 p-5 flex justify-center items-center`}>Found: but incompatible data. ({(currentDonorIndex + 1).toString()} / {qrArrayLength.toString()})</Text>)
                     : isUploadInProgress
-                      ? (<Text style={tw`text-slate-100 bg-green-600 p-5 flex justify-center items-center`}>Found: upload in progress. ({currentDonorIndex.toString()} / {qrArrayLength.toString()})</Text>)
+                      ? (<Text style={tw`text-slate-100 bg-green-600 p-5 flex justify-center items-center`}>Found: upload in progress. ({(currentDonorIndex + 1).toString()} / {qrArrayLength.toString()})</Text>)
                       : isUploadComplete
-                        ? (<Text style={tw`text-slate-100 bg-green-400 p-5 flex justify-center items-center`}>Found: upload complete, item verified! ({currentDonorIndex.toString()} / {qrArrayLength.toString()})</Text>)
+                        ? (<Text style={tw`text-slate-100 bg-green-400 p-5 flex justify-center items-center`}>Found: upload complete, item verified! ({(currentDonorIndex + 1).toString()} / {qrArrayLength.toString()})</Text>)
                         : (<Text style={tw`text-slate-100 text-xl bg-green-400 p-5 flex justify-center items-center`}>Found</Text>)
               : isLocationSet
                 ? isProcessing

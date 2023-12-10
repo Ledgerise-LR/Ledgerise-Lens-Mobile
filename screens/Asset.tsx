@@ -13,7 +13,17 @@ export default function Asset({ route, navigation }) {
   useEffect(() => {
     axios.get(`http://${process.env.SERVER_URL}/auth/authenticate-verifier`)
       .then((res) => {
-        if (res.data.success && res.data.company) return { success: true, company: res.data.company };
+        if (res.data.success && res.data.company) {
+          const url = `http://${process.env.SERVER_URL}/get-asset?tokenId=${tokenId}`;
+
+          axios.get(url)
+            .then(res => {
+              const asset = res.data.activeItem;
+              setAsset(asset);
+              updateTokenUriFields(asset.tokenUri);
+            })
+          return { success: true, company: res.data.company }
+        };
         if (!res.data.success && res.data.err) return navigation.navigate("Welcome")
       })
       .catch((err) => {
@@ -36,19 +46,6 @@ export default function Asset({ route, navigation }) {
   const [assetDescription, setAssetDescription] = useState("");
   const [assetImage, setAssetImage] = useState("");
 
-
-  useEffect(() => {
-
-    const url = `http://${process.env.SERVER_URL}/get-asset?tokenId=${tokenId}`;
-
-    axios.get(url)
-      .then(res => {
-        const asset = res.data.activeItem;
-        setAsset(asset);
-        updateTokenUriFields(asset.tokenUri);
-      })
-
-  }, []);
 
   const updateTokenUriFields = (tokenUri: string) => {
     const tokenUriGateWayUrl = "https://ipfs.io/ipfs/" + tokenUri.split("ipfs://")[1];
