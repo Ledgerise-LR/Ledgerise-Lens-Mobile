@@ -133,13 +133,12 @@ export default function CameraPage({ route, navigation }) {
           const donorIndex = parseInt(data.split("-")[1]);
           const lengthOfQrArray = parseInt(data.split("-")[2]);
 
+          setCurrentDonorIndex(donorIndex + 1);
+
           if ((donorIndex + 1) == lengthOfQrArray) {
-            setQrArrayLength(0);
-            setCurrentDonorIndex(0);
             return setIsProcessing(false);
           }
 
-          setCurrentDonorIndex(donorIndex);
           if (message == "error") return setIsErrorOccured(true);
           else if (message == "already_verified") return setIsAlreadyVerified(true);
           else if (message == "incompatible_data") return setIncompatibleData(true);
@@ -156,11 +155,11 @@ export default function CameraPage({ route, navigation }) {
 
   useEffect(() => {
     ;
-  }, [foundStatus, rectX, rectY, rectW, rectH]);
+  }, [foundStatus, rectX, rectY, rectW, rectH, currentDonorIndex]);
 
   useEffect(() => {
     ;
-  }, [isAlreadyVerified, isErrorOccured, isUploadComplete, isUploadInProgress, isLocationSet, isProcessing, qrArrayLength, currentDonorIndex]);
+  }, [isAlreadyVerified, isErrorOccured, isUploadComplete, isUploadInProgress, isLocationSet, isProcessing, qrArrayLength]);
 
   const sendImageChunks = async (socket: any, imageBase64: any, scannedData: string) => {
     if (imageBase64.length <= 0) return setIsProcessing(false);
@@ -193,8 +192,8 @@ export default function CameraPage({ route, navigation }) {
         let photo = cameraRef.current!.takePictureAsync({ quality: 0.01, skipProcessing: true });
         const image = (await photo);
 
-        const width: number = 375
-        const height: number = 650
+        const width: number = Dimensions.get("window").width;
+        const height: number = (Dimensions.get("window").height) * 0.8;
 
         const compressedImage = await manipulateAsync(
           image.uri,
@@ -312,15 +311,15 @@ export default function CameraPage({ route, navigation }) {
           {
             foundStatus
               ? isErrorOccured
-                ? (<Text style={tw`text-slate-100 p-5 flex justify-center items-center`}>Found: an error occured. ({(currentDonorIndex + 1).toString()} / {qrArrayLength.toString()})</Text>)
+                ? (<Text style={tw`text-slate-100 p-5 flex justify-center items-center`}>Found: an error occured. ({currentDonorIndex} / {qrArrayLength})</Text>)
                 : isAlreadyVerified
-                  ? (<Text style={tw`text-slate-100 bg-blue-400 p-5 flex justify-center items-center`}>Found: but already verified. ({(currentDonorIndex + 1).toString()} / {qrArrayLength.toString()})</Text>)
+                  ? (<Text style={tw`text-slate-100 bg-blue-400 p-5 flex justify-center items-center`}>Found: but already verified. ({currentDonorIndex} / {qrArrayLength})</Text>)
                   : incompatibleData
-                    ? (<Text style={tw`text-slate-100 bg-red-400 p-5 flex justify-center items-center`}>Found: but incompatible data. ({(currentDonorIndex + 1).toString()} / {qrArrayLength.toString()})</Text>)
+                    ? (<Text style={tw`text-slate-100 bg-red-400 p-5 flex justify-center items-center`}>Found: but incompatible data. ({currentDonorIndex} / {qrArrayLength})</Text>)
                     : isUploadInProgress
-                      ? (<Text style={tw`text-slate-100 bg-green-600 p-5 flex justify-center items-center`}>Found: upload in progress. ({(currentDonorIndex + 1).toString()} / {qrArrayLength.toString()})</Text>)
+                      ? (<Text style={tw`text-slate-100 bg-green-600 p-5 flex justify-center items-center`}>Found: upload in progress. ({currentDonorIndex} / {qrArrayLength})</Text>)
                       : isUploadComplete
-                        ? (<Text style={tw`text-slate-100 bg-green-400 p-5 flex justify-center items-center`}>Found: upload complete, item verified! ({(currentDonorIndex + 1).toString()} / {qrArrayLength.toString()})</Text>)
+                        ? (<Text style={tw`text-slate-100 bg-green-400 p-5 flex justify-center items-center`}>Found: upload complete, item verified! ({currentDonorIndex} / {qrArrayLength})</Text>)
                         : (<Text style={tw`text-slate-100 text-xl bg-green-400 p-5 flex justify-center items-center`}>Found</Text>)
               : isLocationSet
                 ? isProcessing
