@@ -7,34 +7,36 @@ import CollectionBox from '../components/CollectionBox';
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import React from 'react';
-
+import { URL, PORT } from '../serverConfig';
 
 export default function Collections({ navigation }) {
 
   const [collections, setCollections] = useState([]);
 
   useEffect(() => {
-    axios.get(`http://${process.env.SERVER_URL}/auth/authenticate-verifier`)
-      .then((res) => {
-        if (res.data.success && res.data.company) {
-          const url = `http://${process.env.SERVER_URL}/get-all-collections`;
+    if (URL) {
+      axios.get(`${URL}:${PORT}/auth/authenticate-verifier`)
+        .then((res) => {
+          if (res.data.success && res.data.company) {
+            const url = `${URL}:${PORT}/get-all-collections`;
 
-          axios.get(url)
-            .then(res => {
-              const data = res.data.subcollections;
-              setCollections(data);
-            })
-            .catch(error => {
-              console.error(error);
-            })
-          return { success: true, company: res.data.company }
-        };
-        if (!res.data.success && res.data.err) return navigation.navigate("Welcome")
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-  }, [])
+            axios.get(url)
+              .then(res => {
+                const data = res.data.subcollections;
+                setCollections(data);
+              })
+              .catch(error => {
+                console.error(error);
+              })
+            return { success: true, company: res.data.company }
+          };
+          if (!res.data.success && res.data.err) return navigation.navigate("Welcome")
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    }
+  }, [URL, PORT]);
 
 
   return (

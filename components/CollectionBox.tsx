@@ -8,7 +8,7 @@ import React from 'react';
 export default function CollectionBox({ navigation, collectionName, itemId, collectionPhoto }) {
 
   return (
-    <View style={tw`mb-12 border w-full p-4 rounded-xl`}>
+    <View style={tw`mb-12 border w-full p-4 rounded-xl h-96`}>
       <View style={tw`h-2/3 aspect-square mb-4 border rounded-xl overflow-hidden`}>
         <Image
           style={tw`h-full w-full rounded-xl`}

@@ -9,32 +9,35 @@ import io from 'socket.io-client'
 import React from 'react';
 import { Svg, Rect } from "react-native-svg";
 import { manipulateAsync, FlipType, SaveFormat } from 'expo-image-manipulator';
+import { URL, PORT } from '../serverConfig';
 
 export default function CameraPage({ route, navigation }) {
 
   useEffect(() => {
-    axios.get(`http://${process.env.SERVER_URL}/auth/authenticate-verifier`)
-      .then((res) => {
-        if (res.data.success && res.data.company) {
-          const url = `http://${process.env.SERVER_URL}/get-asset?tokenId=${tokenId}`;
+    if (URL) {
+      axios.get(`${URL}:${PORT}/auth/authenticate-verifier`)
+        .then((res) => {
+          if (res.data.success && res.data.company) {
+            const url = `${URL}:${PORT}/get-asset?tokenId=${tokenId}`;
 
-          axios.get(url)
-            .then(res => {
-              const data = res.data;
-              setAsset(data.activeItem);
-            })
-          return { success: true, company: res.data.company }
-        };
-        if (!res.data.success && res.data.err) return navigation.navigate("Welcome")
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-  }, [])
+            axios.get(url)
+              .then(res => {
+                const data = res.data;
+                setAsset(data.activeItem);
+              })
+            return { success: true, company: res.data.company }
+          };
+          if (!res.data.success && res.data.err) return navigation.navigate("Welcome")
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    }
+  }, [URL, PORT])
 
   const { tokenId, key } = route.params;
 
-  const [socket, setSocket] = useState(io(`http://${process.env.SERVER_URL}/realtime`));
+  const [socket, setSocket] = useState(io(`${URL}:${PORT}/realtime`));
   const cameraRef = useRef(null)
   const captureInterval = 50  // ms
 

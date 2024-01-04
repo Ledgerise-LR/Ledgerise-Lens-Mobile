@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import AssetBox from '../components/AssetBox';
 import React from 'react';
+import { URL, PORT } from '../serverConfig';
 
 export default function Assets({ route, navigation }) {
 
@@ -12,28 +13,30 @@ export default function Assets({ route, navigation }) {
   const [assets, setAssets] = useState([]);
 
   useEffect(() => {
-    axios.get(`http://${process.env.SERVER_URL}/auth/authenticate-verifier`)
-      .then((res) => {
-        if (res.data.success && res.data.company) {
-          const url = `http://${process.env.SERVER_URL}/get-all-items-collection?subcollectionId=${collectionItemId}`;
+    if (URL) {
+      axios.get(`${URL}:${PORT}/auth/authenticate-verifier`)
+        .then((res) => {
+          if (res.data.success && res.data.company) {
+            const url = `${URL}:${PORT}/get-all-items-collection?subcollectionId=${collectionItemId}`;
 
-          axios.get(url)
-            .then((res) => {
-              const data = res.data;
-              setAssets(data.activeItems);
-            })
-            .catch((err) => {
-              console.error(err);
-            })
+            axios.get(url)
+              .then((res) => {
+                const data = res.data;
+                setAssets(data.activeItems);
+              })
+              .catch((err) => {
+                console.error(err);
+              })
 
-          return { success: true, company: res.data.company }
-        };
-        if (!res.data.success && res.data.err) return navigation.navigate("Welcome")
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-  }, [])
+            return { success: true, company: res.data.company }
+          };
+          if (!res.data.success && res.data.err) return navigation.navigate("Welcome")
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    }
+  }, [URL, PORT])
 
   return (
     <ScrollView style={tw`w-full h-full p-8`}>

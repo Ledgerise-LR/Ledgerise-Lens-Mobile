@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import React from 'react';
 import LocalStorage from "../utils/localStorage";
 import axios from "axios";
+import { URL, PORT } from '../serverConfig';
 axios.defaults.withCredentials = true;
 
 export default function Collections({ navigation }) {
@@ -16,19 +17,21 @@ export default function Collections({ navigation }) {
   const [detectedCompanyName, setDetectedCompanyName] = useState("");
 
   useEffect(() => {
-    axios.get(`http://${process.env.SERVER_URL}/auth/authenticate-verifier`)
-      .then((res) => {
-        if (res.data.success && res.data.company) navigation.navigate("Collections");
-        if (!res.data.success && res.data.err) return { success: false, err: res.data.err }
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-  }, [])
+    if (URL) {
+      axios.get(`${URL}:${PORT}/auth/authenticate-verifier`)
+        .then((res) => {
+          if (res.data.success && res.data.company) navigation.navigate("Collections");
+          if (!res.data.success && res.data.err) return { success: false, err: res.data.err }
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    }
+  }, [URL, PORT])
 
 
   const handleLoginClick = () => {
-    axios.post(`http://${process.env.SERVER_URL}/auth/login-verifier`,
+    axios.post(`${URL}:${PORT}/auth/login-verifier`,
       {
         code: code,
         password: password
@@ -48,7 +51,7 @@ export default function Collections({ navigation }) {
 
   const handleCodeChange = (text: string) => {
     setDetectedCompanyName("");
-    axios.post(`http://${process.env.SERVER_URL}/company/get-name-from-code`, {
+    axios.post(`${URL}:${PORT}/company/get-name-from-code`, {
       code: text
     }).then((res) => {
       if (!res.data.success && res.data.err) return setDetectedCompanyName("");
