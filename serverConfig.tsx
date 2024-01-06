@@ -1,5 +1,5 @@
 
-const URL = "http://localhost";
-const PORT = "4000";
+const URL = "https://api-ledgerise.onrender.com";
+const PORT = "";
 
 export { URL, PORT }
