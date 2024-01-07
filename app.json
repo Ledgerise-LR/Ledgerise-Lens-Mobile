@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": "Nft-Fundraising-Mobile-App",
+    "name": "Ledgerise",
     "slug": "ledgerise-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#000000"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -23,8 +23,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#000000"
       },
       "permissions": [
         "android.permission.CAMERA",
@@ -41,12 +41,6 @@
         {
           "cameraPermission": "Allow to access your camera."
         }
-      ],
-      [
-        "react-native-vision-camera",
-        {
-          "cameraPermissionText": "Ledgerise needs access to your Camera."
-        }
       ]
     ],
     "extra": {
@@ -54,6 +48,12 @@
         "projectId": "2ebc10e4-8515-4663-9e4c-f4eca3d656b8"
       }
     },
-    "owner": "doguboransenturk"
+    "owner": "doguboransenturk",
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/2ebc10e4-8515-4663-9e4c-f4eca3d656b8"
+    }
   }
 }
