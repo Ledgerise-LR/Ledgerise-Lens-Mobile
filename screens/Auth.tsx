@@ -8,8 +8,6 @@ axios.defaults.withCredentials = true;
 
 export default function Collections({ navigation }) {
 
-  const localStorage = new LocalStorage();
-
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
 

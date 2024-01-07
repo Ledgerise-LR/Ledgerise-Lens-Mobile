@@ -82,6 +82,8 @@ export default function CameraPage({ route, navigation }) {
 
     socket.on("connect", async () => {
       console.log("Connected to the server");
+      let { status } = await Location.requestForegroundPermissionsAsync();
+
       const { coords } = await Location.getCurrentPositionAsync({});
       const date = Date.now();
 

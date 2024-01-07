@@ -1,11 +1,8 @@
 import { StyleSheet, Text, View, Dimensions, ScrollView } from 'react-native';
 import tw from 'twrnc';
 import { useEffect, useState } from 'react';
-import CryptoJS from 'crypto-js';
 import axios from "axios";
 import CollectionBox from '../components/CollectionBox';
-import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
 import React from 'react';
 import { URL, PORT } from '../serverConfig';
 
