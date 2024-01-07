@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Nft-Fundraising-Mobile-App",
-    "slug": "Nft-Fundraising-Mobile-App",
+    "slug": "ledgerise-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -48,6 +48,12 @@
           "cameraPermissionText": "Ledgerise needs access to your Camera."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "2ebc10e4-8515-4663-9e4c-f4eca3d656b8"
+      }
+    },
+    "owner": "doguboransenturk"
   }
 }

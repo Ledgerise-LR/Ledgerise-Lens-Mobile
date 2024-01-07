@@ -3,7 +3,6 @@ import tw from 'twrnc';
 import { useEffect, useRef, useState } from 'react';
 import { Camera, CameraType } from 'expo-camera';
 import * as Location from 'expo-location';
-import CryptoJS from 'crypto-js';
 import axios from 'axios';
 import io from 'socket.io-client'
 import React from 'react';

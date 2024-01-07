@@ -2,7 +2,6 @@ import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity, ScrollView 
 import tw from 'twrnc';
 import { useEffect, useState } from 'react';
 import React from 'react';
-import LocalStorage from "../utils/localStorage";
 import axios from "axios";
 import { URL, PORT } from '../serverConfig';
 axios.defaults.withCredentials = true;

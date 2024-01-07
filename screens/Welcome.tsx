@@ -2,7 +2,6 @@ import { StyleSheet, Text, View, Dimensions, Image, TouchableOpacity } from 'rea
 import tw from 'twrnc';
 import { useEffect, useState } from 'react';
 import React from 'react';
-import LocalStorage from "../utils/localStorage";
 import axios from 'axios';
 axios.defaults.withCredentials = true;
 
