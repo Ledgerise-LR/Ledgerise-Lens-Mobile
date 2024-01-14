@@ -193,7 +193,7 @@ export default function CameraPage({ route, navigation }) {
       if (cameraRef.current) {
         const length = JSON.parse(scannedData.split("-")[1]).length;
         setQrArrayLength(length);
-        let photo = cameraRef.current!.takePictureAsync({ quality: 0.01, skipProcessing: true });
+        let photo = cameraRef.current!.takePictureAsync({ quality: 0.5, skipProcessing: true });
         const image = (await photo);
 
         const width: number = Dimensions.get("window").width;
@@ -202,7 +202,7 @@ export default function CameraPage({ route, navigation }) {
         const compressedImage = await manipulateAsync(
           image.uri,
           [{ resize: { width: width, height: height } }],
-          { compress: 0.0, base64: true }
+          { compress: 0.5, base64: true }
         )
 
         await sendImageChunks(socket, compressedImage.base64, scannedData);
