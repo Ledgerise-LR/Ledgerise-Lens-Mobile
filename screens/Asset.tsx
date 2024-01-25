@@ -74,8 +74,9 @@ export default function Asset({ route, navigation }) {
 
     let buyCount = 0;
     let stampCount = 0;
-    let shipCount = 0;
-    let deliverCount = 0;
+    let shippedCount = 0;
+    let deliveredCount = 0;
+
 
     for (let i = 0; i < targetAsset.history.length; i++) {
       const eachHistoryEvent = targetAsset.history[i];
@@ -85,16 +86,25 @@ export default function Asset({ route, navigation }) {
       }
     }
 
+    const realItemHistoryMap = {};
+
     for (let i = 0; i < targetAsset.real_item_history.length; i++) {
       for (let j = 0; j < targetAsset.real_item_history[i].length; j++) {
         const eachHistoryEvent = targetAsset.real_item_history[i][j];
 
-        if (eachHistoryEvent.key == "stamp") {
-          stampCount++;
-        } else if (eachHistoryEvent.key == "shipped") {
-          shipCount++;
-        } else if (eachHistoryEvent.key == "delivered") {
-          deliverCount++;
+        if (realItemHistoryMap[eachHistoryEvent.openseaTokenId] == undefined) {
+          realItemHistoryMap[eachHistoryEvent.openseaTokenId] = {};
+        }
+
+        if (realItemHistoryMap[eachHistoryEvent.openseaTokenId][eachHistoryEvent.key] == undefined) {
+          realItemHistoryMap[eachHistoryEvent.openseaTokenId][eachHistoryEvent.key] = true;
+          if (eachHistoryEvent.key == "stamp") {
+            stampCount++;
+          } else if (eachHistoryEvent.key == "shipped") {
+            shippedCount++;
+          } else if (eachHistoryEvent.key == "delivered") {
+            deliveredCount++;
+          }
         }
       }
     }
@@ -102,8 +112,8 @@ export default function Asset({ route, navigation }) {
 
     return {
       stamp: stampCount,
-      shipped: shipCount,
-      delivered: deliverCount,
+      shipped: shippedCount,
+      delivered: deliveredCount,
       total: buyCount
     }
   }
