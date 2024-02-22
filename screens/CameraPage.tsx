@@ -52,6 +52,7 @@ export default function CameraPage({ route, navigation }) {
   const [isLocationSet, setIsLocationSet] = useState<Boolean>(false);
 
   const [location, setLocation] = useState<Object>({ latitude: 0, longitude: 0 });
+  const [location2, setLocation2] = useState<Object>({ latitude: 0, longitude: 0 });
   const [date, setDate] = useState<number>(0);
   const [isProcessing, setIsProcessing] = useState<Boolean>(false);
 
@@ -73,6 +74,7 @@ export default function CameraPage({ route, navigation }) {
   const [isSocketListenersSet, setIsSocketListenersSet] = useState<Boolean>(false);
 
   const [scannedQrData, setScannedQrData] = useState<String>("");
+  const [barcodeBounds, setBarcodeBounds] = useState<String>("");
 
   setTimeout(() => {
     setIsScanning(true);
@@ -87,12 +89,21 @@ export default function CameraPage({ route, navigation }) {
       const { coords } = await Location.getCurrentPositionAsync({});
       const date = Date.now();
 
-      setLocation({
-        latitude: coords.latitude,
-        longitude: coords.longitude
+      navigator.geolocation.getCurrentPosition(position => {
+        setLocation2({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        });
+
+        setLocation({
+          latitude: coords.latitude,
+          longitude: coords.longitude
+        });
+
+        setDate(date);
+
+        setIsLocationSet(true);
       });
-      setDate(date);
-      setIsLocationSet(true);
     })
 
     socket.on("disconnect", () => {
@@ -165,7 +176,7 @@ export default function CameraPage({ route, navigation }) {
     ;
   }, [isAlreadyVerified, isErrorOccured, isUploadComplete, isUploadInProgress, isLocationSet, isProcessing, qrArrayLength]);
 
-  const sendImageChunks = async (socket: any, imageBase64: any, scannedData: string) => {
+  const sendImageChunks = async (socket: any, imageBase64: any, scannedData: string, barcodeBounds: any) => {
     if (imageBase64.length <= 0) return setIsProcessing(false);
     const chunkSize = 2048;
     for (let offset = 0; offset < imageBase64.length; offset += chunkSize) {
@@ -180,15 +191,20 @@ export default function CameraPage({ route, navigation }) {
         latitude: location.latitude,
         longitude: location.longitude
       },
+      location2: {
+        latitude: location2.latitude,
+        longitude: location2.longitude
+      },
       date: date.toString(),
       key: key,
-      user_info: scannedData.toString()
+      user_info: scannedData.toString(),
+      barcode_bounds: barcodeBounds
     })
 
     await socket.emit('cameraFrame', 'done');
   };
 
-  const onCameraReady = async (scannedData: string) => {
+  const onCameraReady = async (scannedData: string, barcodeBounds: any) => {
     try {
       if (cameraRef.current) {
         const length = JSON.parse(scannedData.split("-")[1]).length;
@@ -205,7 +221,7 @@ export default function CameraPage({ route, navigation }) {
           { compress: 0.5, base64: true }
         )
 
-        await sendImageChunks(socket, compressedImage.base64, scannedData);
+        await sendImageChunks(socket, compressedImage.base64, scannedData, barcodeBounds);
       }
     } catch (error) {
       console.log('Error capturing and sending frame:', error);
@@ -305,7 +321,8 @@ export default function CameraPage({ route, navigation }) {
             if (e.data) {
               setIsProcessing(true);
               setScannedQrData(e.data);
-              await onCameraReady(e.data);
+              setBarcodeBounds(e.bounds);
+              await onCameraReady(e.data, e.bounds);
             } else {
               setIsProcessing(false);
             }
