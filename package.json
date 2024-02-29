@@ -16,7 +16,7 @@
     "crypto-js": "^3.1.9",
     "dotenv": "^16.0.3",
     "eas-cli": "^5.9.3",
-    "expo": "~48.0.15",
+    "expo": "^49.0.0",
     "expo-barcode-scanner": "~12.3.2",
     "expo-camera": "~13.2.1",
     "expo-crypto": "~12.2.1",

@@ -6,8 +6,8 @@ import * as Location from 'expo-location';
 import axios from 'axios';
 import io from 'socket.io-client'
 import React from 'react';
-import { Svg, Rect } from "react-native-svg";
-import { manipulateAsync, FlipType, SaveFormat } from 'expo-image-manipulator';
+import { Svg, Rect, Circle } from "react-native-svg";
+import { manipulateAsync } from 'expo-image-manipulator';
 import { URL, PORT } from '../serverConfig';
 
 export default function CameraPage({ route, navigation }) {
@@ -52,7 +52,6 @@ export default function CameraPage({ route, navigation }) {
   const [isLocationSet, setIsLocationSet] = useState<Boolean>(false);
 
   const [location, setLocation] = useState<Object>({ latitude: 0, longitude: 0 });
-  const [location2, setLocation2] = useState<Object>({ latitude: 0, longitude: 0 });
   const [date, setDate] = useState<number>(0);
   const [isProcessing, setIsProcessing] = useState<Boolean>(false);
 
@@ -74,7 +73,24 @@ export default function CameraPage({ route, navigation }) {
   const [isSocketListenersSet, setIsSocketListenersSet] = useState<Boolean>(false);
 
   const [scannedQrData, setScannedQrData] = useState<String>("");
-  const [barcodeBounds, setBarcodeBounds] = useState<String>("");
+  const [barcodeBounds, setBarcodeBounds] = useState<Object>({
+    x: 0,
+    y: 0
+  });
+
+  const [cornerPoints, setCornerPoints] = useState<any>([{
+    x: 0,
+    y: 0,
+  },{
+    x: 0,
+    y: 0,
+  },{
+    x: 0,
+    y: 0,
+  },{
+    x: 0,
+    y: 0,
+  }]);
 
   setTimeout(() => {
     setIsScanning(true);
@@ -86,24 +102,25 @@ export default function CameraPage({ route, navigation }) {
       console.log("Connected to the server");
       let { status } = await Location.requestForegroundPermissionsAsync();
 
-      const { coords } = await Location.getCurrentPositionAsync({});
+      const { coords } = await Location.getLastKnownPositionAsync({ });
       const date = Date.now();
 
-      navigator.geolocation.getCurrentPosition(position => {
-        setLocation2({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude
-        });
+        if (Math.abs(coords.latitude) >= 0 && Math.abs(coords.longitude) >= 0) {
+          setLocation({
+            latitude: coords.latitude,
+            longitude: coords.longitude
+          });
 
-        setLocation({
-          latitude: coords.latitude,
-          longitude: coords.longitude
-        });
+        } else {
+          alert("Konum bilgisine erişilemiyor.");
+        }
 
-        setDate(date);
-
+        if (date) {
+          setDate(date);
+        } else {
+          alert("Zaman bilgisine erişilemiyor.");
+        }
         setIsLocationSet(true);
-      });
     })
 
     socket.on("disconnect", () => {
@@ -311,7 +328,7 @@ export default function CameraPage({ route, navigation }) {
   return (
     <View style={tw`w-full h-full`}>
       <Camera
-        style={tw`w-full h-full`}
+        style={tw`w-96 h-full`}
         // flashMode={Camera.Constants.FlashMode.torch}
         type={type} ref={(ref) => {
           cameraRef.current = ref;
@@ -319,9 +336,23 @@ export default function CameraPage({ route, navigation }) {
         onBarCodeScanned={async (e) => {
           if (!isProcessing && location.latitude != 0 && location.longitude != 0) {
             if (e.data) {
+
+              const width: number = Dimensions.get("window").width;
+              const height: number = Dimensions.get("window").height * 0.8;
+
+              const qrX = width - (e.bounds.origin.y * width);
+              const qrY = e.bounds.origin.x * height;
+
               setIsProcessing(true);
               setScannedQrData(e.data);
-              setBarcodeBounds(e.bounds);
+
+              const boundsObject = {
+                x: qrX,
+                y: qrY
+              };
+
+              setBarcodeBounds(boundsObject);
+
               await onCameraReady(e.data, e.bounds);
             } else {
               setIsProcessing(false);
@@ -365,7 +396,8 @@ export default function CameraPage({ route, navigation }) {
             strokeWidth="5"
             fill="transparent"
           />
-        </Svg>
+          <Circle cx={barcodeBounds.x} cy={barcodeBounds.y} r="5" fill="red" />        
+          </Svg>
 
       </Camera >
 
