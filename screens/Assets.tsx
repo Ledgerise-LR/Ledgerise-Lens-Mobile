@@ -49,6 +49,7 @@ export default function Assets({ route, navigation }) {
             navigation={navigation}
             tokenUri={asset["tokenUri"] || "https://wallpaperaccess.com/full/187161.jpg"}
             tokenId={asset["tokenId"]}
+            subcollectionId={collectionItemId}
           />
         )
       })}

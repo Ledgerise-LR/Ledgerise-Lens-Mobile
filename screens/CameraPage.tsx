@@ -17,7 +17,7 @@ export default function CameraPage({ route, navigation }) {
       axios.get(`${URL}:${PORT}/auth/authenticate-verifier`)
         .then((res) => {
           if (res.data.success && res.data.company) {
-            const url = `${URL}:${PORT}/get-asset?tokenId=${tokenId}`;
+            const url = `${URL}:${PORT}/get-asset?tokenId=${tokenId}&subcollectionId=${subcollectionId}`;
 
             axios.get(url)
               .then(res => {
@@ -34,7 +34,7 @@ export default function CameraPage({ route, navigation }) {
     }
   }, [URL, PORT])
 
-  const { tokenId, key } = route.params;
+  const { tokenId, key, subcollectionId } = route.params;
 
   const [socket, setSocket] = useState(io(`${URL}:${PORT}/realtime`));
   const cameraRef = useRef(null)
@@ -208,14 +208,11 @@ export default function CameraPage({ route, navigation }) {
         latitude: location.latitude,
         longitude: location.longitude
       },
-      location2: {
-        latitude: location2.latitude,
-        longitude: location2.longitude
-      },
       date: date.toString(),
       key: key,
       user_info: scannedData.toString(),
-      barcode_bounds: barcodeBounds
+      barcode_bounds: barcodeBounds,
+      subcollectionId: subcollectionId
     })
 
     await socket.emit('cameraFrame', 'done');
@@ -229,8 +226,8 @@ export default function CameraPage({ route, navigation }) {
         let photo = cameraRef.current!.takePictureAsync({ quality: 0.5, skipProcessing: true });
         const image = (await photo);
 
-        const width: number = Dimensions.get("window").width;
-        const height: number = (Dimensions.get("window").height) * 0.8;
+        const width: number = Dimensions.get("screen").width;
+        const height: number = (Dimensions.get("screen").height) * 0.8;
 
         const compressedImage = await manipulateAsync(
           image.uri,
@@ -337,8 +334,8 @@ export default function CameraPage({ route, navigation }) {
           if (!isProcessing && location.latitude != 0 && location.longitude != 0) {
             if (e.data) {
 
-              const width: number = Dimensions.get("window").width;
-              const height: number = Dimensions.get("window").height * 0.8;
+              const width: number = Dimensions.get("screen").width;
+              const height: number = Dimensions.get("screen").height * 0.8;
 
               const qrX = width - (e.bounds.origin.y * width);
               const qrY = e.bounds.origin.x * height;
@@ -353,7 +350,7 @@ export default function CameraPage({ route, navigation }) {
 
               setBarcodeBounds(boundsObject);
 
-              await onCameraReady(e.data, e.bounds);
+              await onCameraReady(e.data, boundsObject);
             } else {
               setIsProcessing(false);
             }
@@ -396,11 +393,8 @@ export default function CameraPage({ route, navigation }) {
             strokeWidth="5"
             fill="transparent"
           />
-          <Circle cx={barcodeBounds.x} cy={barcodeBounds.y} r="5" fill="red" />        
-          </Svg>
-
+        </Svg>
       </Camera >
-
       <View style={tw`absolute bottom-0 h-12 w-full left-0 bg-slate-500/50 flex justify-center items-center`}>
         <Text style={tw`text-slate-50`}>{
           <Text>{calculateProductRecordInfoSpecificLocation(asset).targetKey} recorded out of {calculateProductRecordInfoSpecificLocation(asset).total} at {key.toUpperCase()} location</Text>

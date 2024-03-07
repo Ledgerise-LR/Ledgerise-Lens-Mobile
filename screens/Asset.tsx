@@ -15,7 +15,7 @@ export default function Asset({ route, navigation }) {
       axios.get(`${URL}:${PORT}/auth/authenticate-verifier`)
         .then((res) => {
           if (res.data.success && res.data.company) {
-            const url = `${URL}:${PORT}/get-asset?tokenId=${tokenId}`;
+            const url = `${URL}:${PORT}/get-asset?tokenId=${tokenId}&subcollectionId=${subcollectionId}`;
 
             axios.get(url)
               .then(res => {
@@ -33,7 +33,7 @@ export default function Asset({ route, navigation }) {
     }
   }, [URL, PORT])
 
-  const { tokenId } = route.params
+  const { tokenId, subcollectionId } = route.params
 
   const [asset, setAsset] = useState({
     history: [{
@@ -142,6 +142,7 @@ export default function Asset({ route, navigation }) {
       <View style={tw`mt-3 flex flex-row`}>
         <TouchableOpacity style={tw`bg-slate-700 flex items-center justify-center w-1/3 h-10 rounded mr-2 ${stampDisabled ? `bg-slate-500` : ``}`} disabled={stampDisabled} onPressOut={() => navigation.navigate("CameraPage", {
           tokenId: tokenId,
+          subcollectionId: asset.subcollectionId,
           key: "stamp"
         })}>
           <Text style={tw`text-slate-100`}>Üretim noktası</Text>
@@ -151,6 +152,7 @@ export default function Asset({ route, navigation }) {
         </TouchableOpacity>
         <TouchableOpacity style={tw`bg-slate-700 flex items-center justify-center w-1/3 h-10 rounded mr-2 ${shippedDisabled ? `bg-slate-500` : ``}`} disabled={shippedDisabled} onPressOut={() => navigation.navigate("CameraPage", {
           tokenId: tokenId,
+          subcollectionId: asset.subcollectionId,
           key: "shipped"
         })}>
           <Text style={tw`text-slate-100`}>Depo 1</Text>
@@ -160,6 +162,7 @@ export default function Asset({ route, navigation }) {
         </TouchableOpacity>
         <TouchableOpacity style={tw`bg-slate-700 flex items-center justify-center w-1/3 h-10 rounded mr-2 ${deliveredDisabled ? `bg-slate-500` : ``}`} disabled={deliveredDisabled} onPressOut={() => navigation.navigate("CameraPage", {
           tokenId: tokenId,
+          subcollectionId: asset.subcollectionId,
           key: "delivered"
         })}>
           <Text style={tw`text-slate-100`}>Teslim noktası</Text>

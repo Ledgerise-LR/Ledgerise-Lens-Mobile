@@ -8,7 +8,7 @@ import axios from 'axios';
 import React from 'react';
 
 
-export default function AssetBox({ navigation, tokenUri, tokenId }) {
+export default function AssetBox({ navigation, tokenUri, tokenId, subcollectionId }) {
 
   const [assetName, setAssetName] = useState("");
   const [assetDescription, setAssetDescription] = useState("");
@@ -49,7 +49,7 @@ export default function AssetBox({ navigation, tokenUri, tokenId }) {
       <Text style={tw`text-xs`}>{assetDescription}</Text>
       <Button
         title='View'
-        onPress={() => { navigation.navigate("Asset", { tokenId: tokenId }) }}
+        onPress={() => { navigation.navigate("Asset", { tokenId: tokenId, subcollectionId: subcollectionId }) }}
       />
     </View >
   );
