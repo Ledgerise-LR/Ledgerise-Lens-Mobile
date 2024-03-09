@@ -331,6 +331,8 @@ export default function CameraPage({ route, navigation }) {
               } else if (e.boundingBox) {
                 qrX = e.boundingBox.origin.y;
                 qrY = e.boundingBox.origin.x;
+              } else {
+                alert("Cannot get qr location.");
               }
 
               setIsProcessing(true);
