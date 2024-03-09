@@ -40,7 +40,7 @@ export default function Assets({ route, navigation }) {
 
   return (
     <ScrollView style={tw`w-full h-full p-8`}>
-      <Text style={tw`text-2xl`}>Pick a product to record</Text>
+      <Text style={tw`text-2xl`}>Bağış Kolisi Seçenekleri</Text>
       <View style={tw`w-full h-0.5 bg-slate-900 mb-5`}></View>
       {assets.map(asset => {
         return (

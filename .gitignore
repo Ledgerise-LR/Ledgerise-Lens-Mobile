@@ -63,3 +63,5 @@ web-build/
 dist/
 
 # @end expo-cli
+# Ignore Gradle build output directory
+build

@@ -28,7 +28,9 @@
       },
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION"
       ],
       "package": "host.exp.exponent"
     },
@@ -39,16 +41,22 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow to access your camera."
+          "cameraPermission": "Allow Ledgerise to access your camera."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Ledgerise to use your location."
         }
       ]
     ],
     "extra": {
       "eas": {
-        "projectId": "2ebc10e4-8515-4663-9e4c-f4eca3d656b8"
+        "projectId": "be0de17f-39fc-42a4-9ac2-4be9f22e8d75"
       }
     },
-    "owner": "doguboransenturk",
+    "owner": "ledgerise",
     "runtimeVersion": {
       "policy": "sdkVersion"
     },

@@ -138,7 +138,7 @@ export default function Asset({ route, navigation }) {
       <Text># {tokenId}</Text>
       <Text style={tw`text-xl`}>{assetName}</Text>
       <Text style={tw`text-xs`}>{assetDescription}</Text>
-      <Text style={tw`mt-5 text-lg`}>Pick the checkpoint location</Text>
+      <Text style={tw`mt-5 text-lg`}>Koli hangi noktada?</Text>
       <View style={tw`mt-3 flex flex-row`}>
         <TouchableOpacity style={tw`bg-slate-700 flex items-center justify-center w-1/3 h-10 rounded mr-2 ${stampDisabled ? `bg-slate-500` : ``}`} disabled={stampDisabled} onPressOut={() => navigation.navigate("CameraPage", {
           tokenId: tokenId,
@@ -172,11 +172,11 @@ export default function Asset({ route, navigation }) {
         </TouchableOpacity>
       </View>
       <View style={tw`w-full h-0.5 bg-slate-900 mt-5`}></View>
-      <Text style={tw`text-lg`}>Item details</Text>
+      <Text style={tw`text-lg`}>Detalyar</Text>
       <View>
-        <Text style={tw`mb-2`}><Text style={tw`font-700`}>{calculateProductRecordInfoEachLocation(asset).stamp} stamped</Text> out of {calculateProductRecordInfoEachLocation(asset).total} item bought</Text>
-        <Text style={tw`mb-2`}><Text style={tw`font-700`}>{calculateProductRecordInfoEachLocation(asset).shipped} shipped</Text> out of {calculateProductRecordInfoEachLocation(asset).total} item bought</Text>
-        <Text><Text style={tw`font-700`}>{calculateProductRecordInfoEachLocation(asset).delivered} delivered</Text> out of {calculateProductRecordInfoEachLocation(asset).total} item bought</Text>
+        <Text style={tw`mb-2`}><Text style={tw`font-700`}>{calculateProductRecordInfoEachLocation(asset).stamp}</Text> / {calculateProductRecordInfoEachLocation(asset).total} bağış kolisi üretildi</Text>
+        <Text style={tw`mb-2`}><Text style={tw`font-700`}>{calculateProductRecordInfoEachLocation(asset).shipped} </Text>/ {calculateProductRecordInfoEachLocation(asset).total} teslim alındı.</Text>
+        <Text><Text style={tw`font-700`}>{calculateProductRecordInfoEachLocation(asset).delivered}</Text> / {calculateProductRecordInfoEachLocation(asset).total} ihtiyaç sahibine ulaştırıldı.</Text>
       </View>
     </ScrollView >
   );

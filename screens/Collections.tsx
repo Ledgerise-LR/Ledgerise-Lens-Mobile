@@ -38,7 +38,7 @@ export default function Collections({ navigation }) {
 
   return (
     <ScrollView style={tw`w-full h-full p-8`}>
-      <Text style={tw`text-2xl`}>Collections</Text>
+      <Text style={tw`text-2xl`}>Bağış Kampanyaları</Text>
       <View style={tw`w-full h-0.5 bg-slate-900 mb-5`}></View>
       {collections.map(collection => {
         return (

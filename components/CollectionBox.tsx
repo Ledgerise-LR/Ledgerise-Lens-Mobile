@@ -20,7 +20,7 @@ export default function CollectionBox({ navigation, collectionName, itemId, coll
       <Text style={tw`font-bold`}>{collectionName}</Text>
       <Text># {itemId}</Text>
       <Button
-        title='View'
+        title='Görüntüle'
         onPress={() => navigation.navigate("Assets", { collectionItemId: itemId })}
       />
     </View >

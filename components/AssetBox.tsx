@@ -48,7 +48,7 @@ export default function AssetBox({ navigation, tokenUri, tokenId, subcollectionI
       <Text style={tw`text-xl`}>{assetName}</Text>
       <Text style={tw`text-xs`}>{assetDescription}</Text>
       <Button
-        title='View'
+        title='Görüntüle'
         onPress={() => { navigation.navigate("Asset", { tokenId: tokenId, subcollectionId: subcollectionId }) }}
       />
     </View >

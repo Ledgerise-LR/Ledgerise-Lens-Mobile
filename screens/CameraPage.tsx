@@ -78,20 +78,6 @@ export default function CameraPage({ route, navigation }) {
     y: 0
   });
 
-  const [cornerPoints, setCornerPoints] = useState<any>([{
-    x: 0,
-    y: 0,
-  },{
-    x: 0,
-    y: 0,
-  },{
-    x: 0,
-    y: 0,
-  },{
-    x: 0,
-    y: 0,
-  }]);
-
   setTimeout(() => {
     setIsScanning(true);
   }, 2000)
@@ -102,7 +88,7 @@ export default function CameraPage({ route, navigation }) {
       console.log("Connected to the server");
       let { status } = await Location.requestForegroundPermissionsAsync();
 
-      const { coords } = await Location.getLastKnownPositionAsync({ });
+      const { coords } = await Location.getCurrentPositionAsync({ });
       const date = Date.now();
 
         if (Math.abs(coords.latitude) >= 0 && Math.abs(coords.longitude) >= 0) {
@@ -200,7 +186,6 @@ export default function CameraPage({ route, navigation }) {
       const chunk = await imageBase64.substring(offset, offset + chunkSize);
       await socket.emit('cameraFrame', chunk);
     }
-
 
     await socket.emit('cameraFrame', {
       socketCallKey: "locationAndDate",
@@ -325,7 +310,7 @@ export default function CameraPage({ route, navigation }) {
   return (
     <View style={tw`w-full h-full`}>
       <Camera
-        style={tw`w-96 h-full`}
+        style={tw`w-full h-full`}
         // flashMode={Camera.Constants.FlashMode.torch}
         type={type} ref={(ref) => {
           cameraRef.current = ref;
@@ -337,8 +322,16 @@ export default function CameraPage({ route, navigation }) {
               const width: number = Dimensions.get("screen").width;
               const height: number = Dimensions.get("screen").height * 0.8;
 
-              const qrX = width - (e.bounds.origin.y * width);
-              const qrY = e.bounds.origin.x * height;
+              let qrX = 0;
+              let qrY = 0;
+
+              if (e.bounds) {
+                qrX = width - (e.bounds.origin.y * width);
+                qrY = e.bounds.origin.x * height;
+              } else if (e.boundingBox) {
+                qrX = e.boundingBox.origin.y;
+                qrY = e.boundingBox.origin.x;
+              }
 
               setIsProcessing(true);
               setScannedQrData(e.data);
@@ -360,21 +353,21 @@ export default function CameraPage({ route, navigation }) {
           {
             foundStatus
               ? isErrorOccured
-                ? (<Text style={tw`text-slate-100 p-5 flex justify-center items-center`}>Found: an error occured. ({currentDonorIndex} / {qrArrayLength})</Text>)
+                ? (<Text style={tw`text-slate-100 p-5 flex justify-center items-center`}>Bulundu: bir hata oluştu. ({currentDonorIndex} / {qrArrayLength})</Text>)
                 : isAlreadyVerified
-                  ? (<Text style={tw`text-slate-100 bg-blue-400 p-5 flex justify-center items-center`}>Found: but already verified. ({currentDonorIndex} / {qrArrayLength})</Text>)
+                  ? (<Text style={tw`text-slate-100 bg-blue-400 p-5 flex justify-center items-center`}>Bulundu: çoktan kaydedilmiş. ({currentDonorIndex} / {qrArrayLength})</Text>)
                   : incompatibleData
-                    ? (<Text style={tw`text-slate-100 bg-red-400 p-5 flex justify-center items-center`}>Found: but incompatible data. ({currentDonorIndex} / {qrArrayLength})</Text>)
+                    ? (<Text style={tw`text-slate-100 bg-red-400 p-5 flex justify-center items-center`}>Bulundu: veri formatı yanlış. ({currentDonorIndex} / {qrArrayLength})</Text>)
                     : isUploadInProgress
-                      ? (<Text style={tw`text-slate-100 bg-green-600 p-5 flex justify-center items-center`}>Found: upload in progress. ({currentDonorIndex} / {qrArrayLength})</Text>)
+                      ? (<Text style={tw`text-slate-100 bg-green-600 p-5 flex justify-center items-center`}>Bulundu: yükleme. ({currentDonorIndex} / {qrArrayLength})</Text>)
                       : isUploadComplete
-                        ? (<Text style={tw`text-slate-100 bg-green-400 p-5 flex justify-center items-center`}>Found: upload complete, item verified! ({currentDonorIndex} / {qrArrayLength})</Text>)
+                        ? (<Text style={tw`text-slate-100 bg-green-400 p-5 flex justify-center items-center`}>Bulundu: yüklendi! ({currentDonorIndex} / {qrArrayLength})</Text>)
                         : (<Text style={tw`text-slate-100 text-xl bg-green-400 p-5 flex justify-center items-center`}>Found</Text>)
               : isLocationSet
                 ? isProcessing
-                  ? (<Text style={tw`text-slate-800 bg-orange-500 p-5 flex justify-center items-center`}>Analyzing... Please wait.</Text>)
-                  : (<Text style={tw`text-slate-100 p-5 flex justify-center items-center`}>Searching for product...</Text>)
-                : (<Text style={tw`bg-yellow-500 text-slate-800 p-5 flex justify-center items-center`}>Fetching location, please wait.</Text>)
+                  ? (<Text style={tw`text-slate-800 bg-orange-500 p-5 flex justify-center items-center`}>Analiz ediliyor... Lütfen bekleyiniz.</Text>)
+                  : (<Text style={tw`text-slate-100 p-5 flex justify-center items-center`}>Ürün Aranıyor...</Text>)
+                : (<Text style={tw`bg-yellow-500 text-slate-800 p-5 flex justify-center items-center`}>Konuma erişiliyor, lütfen bekleyiniz.</Text>)
 
           }
         </View>
@@ -393,11 +386,20 @@ export default function CameraPage({ route, navigation }) {
             strokeWidth="5"
             fill="transparent"
           />
+          <Rect
+            x={barcodeBounds.x}
+            y={barcodeBounds.y}
+            width={5}
+            height={5}
+            stroke="green"
+            strokeWidth="5"
+            fill="green"
+          />
         </Svg>
       </Camera >
       <View style={tw`absolute bottom-0 h-12 w-full left-0 bg-slate-500/50 flex justify-center items-center`}>
         <Text style={tw`text-slate-50`}>{
-          <Text>{calculateProductRecordInfoSpecificLocation(asset).targetKey} recorded out of {calculateProductRecordInfoSpecificLocation(asset).total} at {key.toUpperCase()} location</Text>
+          <Text>{calculateProductRecordInfoSpecificLocation(asset).targetKey} / {calculateProductRecordInfoSpecificLocation(asset).total} {key.toUpperCase()} kaydedildi.</Text>
         }</Text>
       </View>
     </View >

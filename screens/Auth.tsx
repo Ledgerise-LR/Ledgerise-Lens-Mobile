@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import React from 'react';
 import axios from "axios";
 import { URL, PORT } from '../serverConfig';
-axios.defaults.withCredentials = true;
 
 export default function Collections({ navigation }) {
 
@@ -70,8 +69,8 @@ export default function Collections({ navigation }) {
           <View style={tw`w-1/4 aspect-square mb-4 relative`}>
             <Image style={tw`w-full h-full absolute`} source={require("../assets/logo.png")} />
           </View>
-          <Text style={tw`text-4xl font-bold mb-4`}>Verifier Login</Text>
-          <Text>Enter the Company / Campaign code, and password to start verifying the donations.</Text>
+          <Text style={tw`text-4xl font-bold mb-4`}>Doğrulayıcı Girişi</Text>
+          <Text>Kurum kodu ve şifre ile giriş yapınız.</Text>
         </View>
         <View style={tw`p-4 bg-slate-100 rounded-lg border-slate-400 border`}>
           <TextInput
@@ -94,16 +93,16 @@ export default function Collections({ navigation }) {
             detectedCompanyName
               ? (
                 <View>
-                  <Text style={tw`text-slate-500`}>Detected company</Text>
+                  <Text style={tw`text-slate-500`}>Tespit Edilen Şirket</Text>
                   <Text style={tw`text-slate-800 font-bold`}>{detectedCompanyName}</Text>
                 </View>
               )
-              : (<Text>No company detected.</Text>)
+              : (<Text>Bir şirket tespit edilemedi.</Text>)
           }
         </View>
         <TouchableOpacity style={tw`w-3/5 h-14 bg-blue-900 relative rounded-lg ml-auto mt-4`} onPressOut={() => { handleLoginClick() }}>
           <View style={tw`flex flex-row h-full w-full bg-blue-900 relative items-center rounded-lg`}>
-            <Text style={tw`ml-4 text-slate-50 font-bold`}>Login</Text>
+            <Text style={tw`ml-4 text-slate-50 font-bold`}>Giriş yap</Text>
             <View style={tw`right-0 absolute h-full aspect-square rounded-lg flex justify-center items-center flex-row bg-blue-700`}>
               <Text style={tw`text-slate-50`}>→</Text>
             </View>
