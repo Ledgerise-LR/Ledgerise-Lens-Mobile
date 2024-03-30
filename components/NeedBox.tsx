@@ -8,12 +8,30 @@ import axios from 'axios';
 import React from 'react';
 
 
-export default function AssetBox({ navigation, tokenUri, tokenId, subcollectionId, nftAddress }) {
+export default function NeedBox({ navigation, tokenUri, tokenId, subcollectionId, history, availableEditions }) {
 
   const [assetName, setAssetName] = useState("");
   const [assetDescription, setAssetDescription] = useState("");
   const [assetImage, setAssetImage] = useState("");
 
+  const [totalNeeds, setTotalNeeds] = useState(0);
+  const [satisfiedNeeds, setSatsfiedNeeds] = useState(0);
+
+  useEffect(() => {
+
+    let historyCount = 0;
+
+    for (let i = 0; i < history.length; i++) {
+      const historyElement = history[i];
+      
+      if (historyElement.key == "buy") {
+        historyCount++;
+      };
+    };
+
+    setTotalNeeds(historyCount + availableEditions);
+    setSatsfiedNeeds(historyCount);
+  }, []);
 
   useEffect(() => {
 
@@ -46,10 +64,25 @@ export default function AssetBox({ navigation, tokenUri, tokenId, subcollectionI
       </View>
       <Text># {tokenId}</Text>
       <Text style={tw`text-xl`}>{assetName}</Text>
-      <Text style={tw`text-xs`}>{assetDescription}</Text>
+      <Text style={tw`text-xs mb-8`}>{assetDescription}</Text>
+      <View style={tw`w-full flex flex-row`}>
+        <Text>Karşılanma</Text>
+        <View style={tw`w-7/12 relative my-1 mx-4`}>
+          <View style={tw`w-full bg-slate-300 h-2 absolute rounded-full`}></View>
+          <View style={{
+            width: `${(satisfiedNeeds/totalNeeds) * 100}%`,
+            height: 8,
+            backgroundColor: "green",
+            position: "absolute",
+            zIndex: "100",
+            borderRadius: "10px"
+          }}></View>
+        </View>
+        <Text>{satisfiedNeeds}/{totalNeeds}</Text>
+      </View>
       <Button
-        title='Görüntüle'
-        onPress={() => { navigation.navigate("Asset", { tokenId: tokenId, subcollectionId: subcollectionId, nftAddress: nftAddress }) }}
+        title='Doğrula'
+        onPress={() => { navigation.navigate("Asset", { tokenId: tokenId, subcollectionId: subcollectionId }) }}
       />
     </View >
   );

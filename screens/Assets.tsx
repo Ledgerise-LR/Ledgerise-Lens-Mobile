@@ -8,7 +8,7 @@ import { URL, PORT } from '../serverConfig';
 
 export default function Assets({ route, navigation }) {
 
-  const { collectionItemId } = route.params
+  const { collectionItemId, nftAddress } = route.params;
 
   const [assets, setAssets] = useState([]);
 
@@ -17,7 +17,7 @@ export default function Assets({ route, navigation }) {
       axios.get(`${URL}:${PORT}/auth/authenticate-verifier`)
         .then((res) => {
           if (res.data.success && res.data.company) {
-            const url = `${URL}:${PORT}/get-all-items-collection?subcollectionId=${collectionItemId}`;
+            const url = `${URL}:${PORT}/get-all-items-collection?subcollectionId=${collectionItemId}&nftAddress=${nftAddress}`;
 
             axios.get(url)
               .then((res) => {
@@ -50,6 +50,7 @@ export default function Assets({ route, navigation }) {
             tokenUri={asset["tokenUri"] || "https://wallpaperaccess.com/full/187161.jpg"}
             tokenId={asset["tokenId"]}
             subcollectionId={collectionItemId}
+            nftAddress={asset["nftAddress"]}
           />
         )
       })}

@@ -10,12 +10,14 @@ import React from 'react';
 
 export default function Asset({ route, navigation }) {
 
+  const { tokenId, subcollectionId, nftAddress } = route.params
+
   useEffect(() => {
     if (URL) {
       axios.get(`${URL}:${PORT}/auth/authenticate-verifier`)
         .then((res) => {
           if (res.data.success && res.data.company) {
-            const url = `${URL}:${PORT}/get-asset?tokenId=${tokenId}&subcollectionId=${subcollectionId}`;
+            const url = `${URL}:${PORT}/get-asset?tokenId=${tokenId}&subcollectionId=${subcollectionId}&nftAddress=${nftAddress}`;
 
             axios.get(url)
               .then(res => {
@@ -32,8 +34,6 @@ export default function Asset({ route, navigation }) {
         })
     }
   }, [URL, PORT])
-
-  const { tokenId, subcollectionId } = route.params
 
   const [asset, setAsset] = useState({
     history: [{
@@ -143,7 +143,8 @@ export default function Asset({ route, navigation }) {
         <TouchableOpacity style={tw`bg-slate-700 flex items-center justify-center w-1/3 h-10 rounded mr-2 ${stampDisabled ? `bg-slate-500` : ``}`} disabled={stampDisabled} onPressOut={() => navigation.navigate("CameraPage", {
           tokenId: tokenId,
           subcollectionId: asset.subcollectionId,
-          key: "stamp"
+          key: "stamp",
+          nftAddress: nftAddress
         })}>
           <Text style={tw`text-slate-100`}>Üretim noktası</Text>
           {deliveredDisabled ? (<View style={tw`absolute w-8 bg-green-600 aspect-square rounded-full flex justify-center items-center`}>
@@ -153,7 +154,8 @@ export default function Asset({ route, navigation }) {
         <TouchableOpacity style={tw`bg-slate-700 flex items-center justify-center w-1/3 h-10 rounded mr-2 ${shippedDisabled ? `bg-slate-500` : ``}`} disabled={shippedDisabled} onPressOut={() => navigation.navigate("CameraPage", {
           tokenId: tokenId,
           subcollectionId: asset.subcollectionId,
-          key: "shipped"
+          key: "shipped",
+          nftAddress: nftAddress
         })}>
           <Text style={tw`text-slate-100`}>Depo 1</Text>
           {deliveredDisabled ? (<View style={tw`absolute w-8 bg-green-600 aspect-square rounded-full flex justify-center items-center`}>
@@ -163,7 +165,8 @@ export default function Asset({ route, navigation }) {
         <TouchableOpacity style={tw`bg-slate-700 flex items-center justify-center w-1/3 h-10 rounded mr-2 ${deliveredDisabled ? `bg-slate-500` : ``}`} disabled={deliveredDisabled} onPressOut={() => navigation.navigate("CameraPage", {
           tokenId: tokenId,
           subcollectionId: asset.subcollectionId,
-          key: "delivered"
+          key: "delivered",
+          nftAddress: nftAddress
         })}>
           <Text style={tw`text-slate-100`}>Teslim noktası</Text>
           {deliveredDisabled ? (<View style={tw`absolute w-8 bg-green-600 aspect-square rounded-full flex justify-center items-center`}>
@@ -172,7 +175,7 @@ export default function Asset({ route, navigation }) {
         </TouchableOpacity>
       </View>
       <View style={tw`w-full h-0.5 bg-slate-900 mt-5`}></View>
-      <Text style={tw`text-lg`}>Detalyar</Text>
+      <Text style={tw`text-lg`}>Detaylar</Text>
       <View>
         <Text style={tw`mb-2`}><Text style={tw`font-700`}>{calculateProductRecordInfoEachLocation(asset).stamp}</Text> / {calculateProductRecordInfoEachLocation(asset).total} bağış kolisi üretildi</Text>
         <Text style={tw`mb-2`}><Text style={tw`font-700`}>{calculateProductRecordInfoEachLocation(asset).shipped} </Text>/ {calculateProductRecordInfoEachLocation(asset).total} teslim alındı.</Text>

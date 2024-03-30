@@ -15,7 +15,7 @@ export default function Collections({ navigation }) {
       axios.get(`${URL}:${PORT}/auth/authenticate-verifier`)
         .then((res) => {
           if (res.data.success && res.data.company) {
-            const url = `${URL}:${PORT}/get-all-collections`;
+            const url = `${URL}:${PORT}/company/get-all-collections`;
 
             axios.get(url)
               .then(res => {
@@ -48,6 +48,7 @@ export default function Collections({ navigation }) {
             itemId={collection["itemId"]}
             collectionName={collection["name"]}
             collectionPhoto={collection["image"] || "https://wallpaperaccess.com/full/187161.jpg"}
+            nftAddress={collection["nftAddress"]}
           />
         )
       })}

@@ -5,7 +5,7 @@ import tw from 'twrnc';
 import { useEffect, useState } from 'react';
 import React from 'react';
 
-export default function CollectionBox({ navigation, collectionName, itemId, collectionPhoto }) {
+export default function CollectionBox({ navigation, collectionName, itemId, collectionPhoto, nftAddress }) {
 
   return (
     <View style={tw`mb-12 border w-full p-4 rounded-xl h-96`}>
@@ -21,7 +21,7 @@ export default function CollectionBox({ navigation, collectionName, itemId, coll
       <Text># {itemId}</Text>
       <Button
         title='Görüntüle'
-        onPress={() => navigation.navigate("Assets", { collectionItemId: itemId })}
+        onPress={() => navigation.navigate("Assets", { collectionItemId: itemId, nftAddress: nftAddress })}
       />
     </View >
   );

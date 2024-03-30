@@ -38,13 +38,13 @@ export default function Collections({ navigation }) {
               <Text style={tw`text-sm text-slate-50`}>Bir şirkette kurye olarak çalışıyorum</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity style={tw`w-2/3 relative aspect-square mb-4 flex flex-col-reverse`} onPressOut={() => { navigation.navigate("Auth") }}>
+          <TouchableOpacity style={tw`w-2/3 relative aspect-square mb-4 flex flex-col-reverse`} onPressOut={() => { navigation.navigate("AuthBeneficiary") }}>
             <View style={tw`w-full h-full absolute`}>
               <Image style={tw`w-full h-full`} source={require("../assets/companion.png")} />
             </View>
             <View style={tw`bg-slate-800 bg-opacity-75 p-4`}>
-              <Text style={tw`text-lg text-slate-50 font-bold`}>Refakatçi</Text>
-              <Text style={tw`text-sm text-slate-50`}>Bağışları doğrulamak için gönüllü oldum.</Text>
+              <Text style={tw`text-lg text-slate-50 font-bold`}>Bağışı alan veya refakatçi</Text>
+              <Text style={tw`text-sm text-slate-50`}>Bağışı bizzat teslim alacağım.</Text>
             </View>
           </TouchableOpacity>
         </View>

@@ -12,12 +12,14 @@ import { URL, PORT } from '../serverConfig';
 
 export default function CameraPage({ route, navigation }) {
 
+  const { tokenId, key, subcollectionId, nftAddress } = route.params;
+
   useEffect(() => {
     if (URL) {
       axios.get(`${URL}:${PORT}/auth/authenticate-verifier`)
         .then((res) => {
           if (res.data.success && res.data.company) {
-            const url = `${URL}:${PORT}/get-asset?tokenId=${tokenId}&subcollectionId=${subcollectionId}`;
+            const url = `${URL}:${PORT}/get-asset?tokenId=${tokenId}&subcollectionId=${subcollectionId}&nftAddress=${nftAddress}`;
 
             axios.get(url)
               .then(res => {
@@ -34,7 +36,6 @@ export default function CameraPage({ route, navigation }) {
     }
   }, [URL, PORT])
 
-  const { tokenId, key, subcollectionId } = route.params;
 
   const [socket, setSocket] = useState(io(`${URL}:${PORT}/realtime`));
   const cameraRef = useRef(null)
@@ -197,7 +198,8 @@ export default function CameraPage({ route, navigation }) {
       key: key,
       user_info: scannedData.toString(),
       barcode_bounds: barcodeBounds,
-      subcollectionId: subcollectionId
+      subcollectionId: subcollectionId,
+      nftAddress: nftAddress
     })
 
     await socket.emit('cameraFrame', 'done');
