@@ -12,7 +12,7 @@ import { URL, PORT } from '../serverConfig';
 
 export default function CameraPage({ route, navigation }) {
 
-  const { tokenId, key, subcollectionId, nftAddress } = route.params;
+  const { isNeedItem, tokenId, key, subcollectionId, nftAddress } = route.params;
 
   useEffect(() => {
     if (URL) {
@@ -28,7 +28,15 @@ export default function CameraPage({ route, navigation }) {
               })
             return { success: true, company: res.data.company }
           };
-          if (!res.data.success && res.data.err) return navigation.navigate("Welcome")
+          if (!res.data.success && res.data.err) {
+            
+            axios.get(`${URL}:${PORT}/auth/authenticate-beneficiary`)
+            .then((res) => {
+              if (res.data.success && res.data.beneficiary) {
+                ;
+              } else return navigation.navigate("Welcome")
+            }) 
+          }
         })
         .catch((err) => {
           console.log(err)
@@ -401,11 +409,15 @@ export default function CameraPage({ route, navigation }) {
           />
         </Svg>
       </Camera >
-      <View style={tw`absolute bottom-0 h-12 w-full left-0 bg-slate-500/50 flex justify-center items-center`}>
-        <Text style={tw`text-slate-50`}>{
-          <Text>{calculateProductRecordInfoSpecificLocation(asset).targetKey} / {calculateProductRecordInfoSpecificLocation(asset).total} {key.toUpperCase()} kaydedildi.</Text>
-        }</Text>
-      </View>
+      {
+        isNeedItem
+          ? ("")
+            :<View style={tw`absolute bottom-0 h-12 w-full left-0 bg-slate-500/50 flex justify-center items-center`}>
+              <Text style={tw`text-slate-50`}>{
+                <Text>{calculateProductRecordInfoSpecificLocation(asset).targetKey} / {calculateProductRecordInfoSpecificLocation(asset).total} {key.toUpperCase()} kaydedildi.</Text>
+              }</Text>
+            </View>
+      }
     </View >
   );
 }
